@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR 이슈 모니터</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: #f5f5f0; color: #1a1a1a; }
+  .header { background: #fff; border-bottom: 1px solid #e5e5e0; padding: 1.25rem 1.5rem; }
+  .header h1 { font-size: 18px; font-weight: 600; }
+  .header p { font-size: 13px; color: #888; margin-top: 3px; }
+  .container { max-width: 800px; margin: 0 auto; padding: 1.25rem 1rem; }
+  .search-wrap { position: relative; margin-bottom: 1rem; }
+  .search-wrap input { width: 100%; padding: 10px 16px 10px 38px; font-size: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; outline: none; }
+  .search-wrap input:focus { border-color: #999; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 15px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .tab { padding: 6px 14px; font-size: 13px; border-radius: 20px; border: 1px solid #ddd; background: #fff; color: #555; cursor: pointer; }
+  .tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .count { font-size: 12px; color: #aaa; }
+  .refresh-btn { font-size: 13px; padding: 6px 14px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; color: #555; }
+  .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .news-list { display: flex; flex-direction: column; gap: 8px; }
+  .news-card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 14px 16px; }
+  .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+  .badge-노무 { background: #E6F1FB; color: #0C447C; }
+  .badge-인사전략 { background: #EEEDFE; color: #3C3489; }
+  .badge-보상 { background: #EAF3DE; color: #27500A; }
+  .badge-채용 { background: #FAEEDA; color: #633806; }
+  .badge-인재육성 { background: #E1F5EE; color: #085041; }
+  .badge-조직문화 { background: #FBEAF0; color: #72243E; }
+  .badge-근태 { background: #FAECE7; color: #712B13; }
+  .badge-기타 { background: #F1EFE8; color: #444441; }
+  .card-source { font-size: 12px; color: #aaa; }
+  .card-date { font-size: 12px; color: #aaa; margin-left: auto; }
+  .card-title { font-size: 14px; font-weight: 600; line-height: 1.5; margin-bottom: 4px; }
+  .card-title a { color: #1a1a1a; text-decoration: none; }
+  .card-title a:hover { text-decoration: underline; }
+  .card-desc { font-size: 13px; color: #666; line-height: 1.6; }
+  .highlight { background: #FAEEDA; color: #633806; border-radius: 2px; padding: 0 2px; }
+  .empty { text-align: center; padding: 3rem; color: #aaa; font-size: 14px; }
+  .loading { text-align: center; padding: 2rem; color: #aaa; font-size: 14px; }
+  .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #eee; border-top-color: #888; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>HR 이슈 모니터</h1>
+  <p>매일 아침 HR 주요 뉴스 · 판례 · 행정해석을 한눈에</p>
+</div>
+<div class="container">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="제목·내용으로 검색 (예: 최저임금, 포괄임금, 성과급)" oninput="onSearch(this.value)" />
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="setTab(this,'전체')">전체</button>
+    <button class="tab" onclick="setTab(this,'인사전략')">인사전략</button>
+    <button class="tab" onclick="setTab(this,'노무')">노무</button>
+    <button class="tab" onclick="setTab(this,'인재육성')">인재육성</button>
+    <button class="tab" onclick="setTab(this,'보상')">보상</button>
+    <button class="tab" onclick="setTab(this,'채용')">채용</button>
+    <button class="tab" onclick="setTab(this,'조직문화')">조직문화</button>
+    <button class="tab" onclick="setTab(this,'근태')">근태</button>
+    <button class="tab" onclick="setTab(this,'기타')">기타</button>
+  </div>
+  <div
