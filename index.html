@@ -64,7 +64,6 @@
     <span class="search-icon">🔍</span>
     <input type="text" id="search" placeholder="제목·내용으로 검색 (예: 채용, 휴직제도, 판례)" oninput="onSearch(this.value)" />
   </div>
-
   <div class="date-row">
     <label>기간</label>
     <input type="date" id="date-from" onchange="renderList()" />
@@ -72,7 +71,6 @@
     <input type="date" id="date-to" onchange="renderList()" />
     <button class="date-reset" onclick="resetDate()">전체 기간</button>
   </div>
-
   <div class="tabs">
     <button class="tab active" onclick="setTab(this,'전체')">전체</button>
     <button class="tab" onclick="setTab(this,'인사전략')">인사전략</button>
@@ -84,7 +82,6 @@
     <button class="tab" onclick="setTab(this,'근태')">근태</button>
     <button class="tab" onclick="setTab(this,'기타')">기타</button>
   </div>
-
   <div class="meta-row">
     <span class="count" id="count-label">불러오는 중...</span>
     <button class="refresh-btn" id="refresh-btn" onclick="loadNews()">새로고침</button>
@@ -108,6 +105,26 @@ const KEYWORDS = {
   '근태': ['근태','유연근무','재택근무','선택근무','연장근로','휴가','근로시간'],
   '기타': ['HR테크','HRIS','ATS','인사시스템','HR솔루션']
 };
+
+const EXCLUDE_KEYWORDS = [
+  '선거','후보','정당','국회','의원','대통령','정치','보수','진보',
+  '야당','여당','지지율','출마','당선','낙선','투표','개헌',
+  '암세포','DNA','의학','병원','진단','수술','치료','임상',
+  '주가','코스피','환율','증권','펀드','ETF','채권','부동산',
+  '아파트','분양','재건축','청약'
+];
+
+const HR_MUST = [
+  'hr','인사','노무','채용','임금','근로','직원','직장','조직',
+  '고용','교육','육성','역량','성과','연봉','급여','근태',
+  '휴가','해고','노사','취업규칙','단체협약','판례','행정해석'
+];
+
+function isHRRelated(title, desc) {
+  const text = (title + ' ' + desc).toLowerCase();
+  if (EXCLUDE_KEYWORDS.some(k => text.includes(k.toLowerCase()))) return false;
+  return HR_MUST.some(k => text.includes(k.toLowerCase()));
+}
 
 function categorize(title, desc) {
   const text = (title + ' ' + desc).toLowerCase();
@@ -143,16 +160,9 @@ async function loadNews() {
 
   try {
     const queries = [
-      'HR 인사관리',
-      '노무 근로기준법',
-      '채용 인재',
-      '임금 성과급',
-      '조직문화 직원',
-      '고용노동부 고용',
-      '부당해고 판례',
-      '유연근무 근로시간',
-      '인사관리 HR전략',
-      '직장 노사'
+      'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
+      '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
+      '유연근무 근로시간', '부당해고 징계', '직장 노사관계', '인재육성 교육'
     ];
     const results = await Promise.all(
       queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
@@ -161,12 +171,13 @@ async function loadNews() {
     const seen = new Set();
     allNews = [];
     results.forEach(data => {
-      if (!data.items) return;
-      data.items.forEach(item => {
+      const items = data.items || [];
+      items.forEach(item => {
         if (seen.has(item.link)) return;
         seen.add(item.link);
         const title = item.title.replace(/<[^>]+>/g, '');
         const desc = item.description.replace(/<[^>]+>/g, '');
+        if (!isHRRelated(title, desc)) return;
         allNews.push({
           title, desc,
           link: item.link,
