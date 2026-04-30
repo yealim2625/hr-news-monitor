@@ -11,10 +11,17 @@
   .header h1 { font-size: 18px; font-weight: 600; }
   .header p { font-size: 13px; color: #888; margin-top: 3px; }
   .container { max-width: 800px; margin: 0 auto; padding: 1.25rem 1rem; }
-  .search-wrap { position: relative; margin-bottom: 1rem; }
-  .search-wrap input { width: 100%; padding: 10px 16px 10px 38px; font-size: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; outline: none; }
+  .search-wrap { position: relative; margin-bottom: 0.75rem; }
+  .search-wrap input[type="text"] { width: 100%; padding: 10px 16px 10px 38px; font-size: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; outline: none; }
   .search-wrap input:focus { border-color: #999; }
   .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 15px; }
+  .date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .date-row label { font-size: 13px; color: #888; }
+  .date-row input[type="date"] { padding: 6px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; background: #fff; outline: none; color: #1a1a1a; }
+  .date-row input[type="date"]:focus { border-color: #999; }
+  .date-sep { font-size: 13px; color: #aaa; }
+  .date-reset { font-size: 12px; padding: 5px 10px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #888; cursor: pointer; }
+  .date-reset:hover { background: #f0f0f0; }
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
   .tab { padding: 6px 14px; font-size: 13px; border-radius: 20px; border: 1px solid #ddd; background: #fff; color: #555; cursor: pointer; }
   .tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
@@ -24,7 +31,7 @@
   .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .news-list { display: flex; flex-direction: column; gap: 8px; }
   .news-card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 14px 16px; }
-  .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
   .badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
   .badge-노무 { background: #E6F1FB; color: #0C447C; }
   .badge-인사전략 { background: #EEEDFE; color: #3C3489; }
@@ -57,6 +64,15 @@
     <span class="search-icon">🔍</span>
     <input type="text" id="search" placeholder="제목·내용으로 검색 (예: 채용, 휴직제도, 판례)" oninput="onSearch(this.value)" />
   </div>
+
+  <div class="date-row">
+    <label>기간</label>
+    <input type="date" id="date-from" onchange="renderList()" />
+    <span class="date-sep">~</span>
+    <input type="date" id="date-to" onchange="renderList()" />
+    <button class="date-reset" onclick="resetDate()">전체 기간</button>
+  </div>
+
   <div class="tabs">
     <button class="tab active" onclick="setTab(this,'전체')">전체</button>
     <button class="tab" onclick="setTab(this,'인사전략')">인사전략</button>
@@ -68,6 +84,7 @@
     <button class="tab" onclick="setTab(this,'근태')">근태</button>
     <button class="tab" onclick="setTab(this,'기타')">기타</button>
   </div>
+
   <div class="meta-row">
     <span class="count" id="count-label">불러오는 중...</span>
     <button class="refresh-btn" id="refresh-btn" onclick="loadNews()">새로고침</button>
@@ -106,6 +123,18 @@ function formatDate(pubDate) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
+function toYMD(pubDate) {
+  if (!pubDate) return '';
+  const d = new Date(pubDate);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function resetDate() {
+  document.getElementById('date-from').value = '';
+  document.getElementById('date-to').value = '';
+  renderList();
+}
+
 async function loadNews() {
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
@@ -113,7 +142,18 @@ async function loadNews() {
   document.getElementById('news-list').innerHTML = '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
 
   try {
-    const queries = ['HR 인사관리','노무 근로기준법','채용 인재','임금 성과급','조직문화 직원'];
+    const queries = [
+      'HR 인사관리',
+      '노무 근로기준법',
+      '채용 인재',
+      '임금 성과급',
+      '조직문화 직원',
+      '고용노동부 고용',
+      '부당해고 판례',
+      '유연근무 근로시간',
+      '인사관리 HR전략',
+      '직장 노사'
+    ];
     const results = await Promise.all(
       queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
     );
@@ -132,6 +172,7 @@ async function loadNews() {
           link: item.link,
           source: item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스',
           date: formatDate(item.pubDate),
+          ymd: toYMD(item.pubDate),
           pubDate: item.pubDate,
           cat: categorize(title, desc)
         });
@@ -171,13 +212,21 @@ function hl(text, q) {
 
 function renderList() {
   let list = currentTab === '전체' ? allNews : allNews.filter(i => i.cat === currentTab);
+
+  const from = document.getElementById('date-from').value;
+  const to = document.getElementById('date-to').value;
+  if (from) list = list.filter(i => i.ymd >= from);
+  if (to)   list = list.filter(i => i.ymd <= to);
+
   if (currentQuery) {
     const q = currentQuery.toLowerCase();
     list = list.filter(i => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
   }
+
   const q = currentQuery;
   document.getElementById('count-label').textContent =
-    (currentTab === '전체' ? '전체' : currentTab) + ' ' + list.length + '건' + (q ? ' — "'+q+'" 검색 결과' : '');
+    (currentTab === '전체' ? '전체' : currentTab) + ' ' + list.length + '건' +
+    (q ? ' — "'+q+'" 검색 결과' : '');
 
   if (!list.length) {
     document.getElementById('news-list').innerHTML = '<div class="empty">검색 결과가 없습니다.</div>';
