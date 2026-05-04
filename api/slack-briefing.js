@@ -11,8 +11,7 @@ const EXCLUDE_KEYWORDS = [
   '선거','후보','정당','국회','의원','대통령','정치','보수','진보',
   '야당','여당','주가','코스피','환율','증권','부동산','아파트','암세포',
   '장학','장학생','중학교','고등학교','초등학교','청소년','입시','수능',
-  '지역인재','드림플러스','인베스터','스마트팜','농업','귀농','투자인재',
-  '지역','읍면동','군청','시청','구청','복지관','봉사'
+  '지역인재','드림플러스','인베스터','스마트팜','농업','귀농','봉사'
 ];
 
 const HR_MUST = [
@@ -34,6 +33,11 @@ const TREND_KEYWORDS = [
   '리포트','보고서','통계','역대','최고','최저','처음'
 ];
 
+const AI_KEYWORDS = [
+  'ai hr','hr ai','hr테크','hr tech','hr data','hr analytics',
+  'ai 채용','ai 면접','챗gpt','생성ai'
+];
+
 function isHRRelated(title, desc) {
   const text = (title + ' ' + desc).toLowerCase();
   if (EXCLUDE_KEYWORDS.some(k => text.includes(k.toLowerCase()))) return false;
@@ -48,28 +52,28 @@ function formatDate(pubDate) {
 
 function getCategoryEmoji(cat) {
   const map = {
-    '인사전략': '🎯', '노무': '⚖️', '보상': '💰',
-    '채용': '🔍', '인재육성': '📚', '조직문화': '🌱',
-    '근태': '🕐', '기타': '📌'
+    'HR Insight': '💡', 'HR AI': '🤖', '노무': '⚖️',
+    '인재육성': '📚', '채용': '🔍', '조직문화': '🌱',
+    '근태': '🕐', '평가·보상': '💰'
   };
-  return map[cat] || '📌';
+  return map[cat] || '💡';
 }
 
 function categorize(title, desc) {
   const text = (title + ' ' + desc).toLowerCase();
   const KEYWORDS = {
-    '인사전략': ['hr전략','인사전략','hrbp','조직설계','인력계획','hr혁신','인사조직개편','성과관리'],
+    'HR AI': ['ai hr','hr ai','hr테크','hr tech','hr data','hr analytics','ai 채용','ai 면접','챗gpt','생성ai'],
     '노무': ['노무','근로기준법','판례','행정해석','부당해고','노사관계','단체협약','취업규칙','임금체불','해고','근로감독','인사노무'],
-    '보상': ['임금','성과급','연봉','급여','보상체계','통상임금','최저임금','연봉인상','임금체계'],
-    '채용': ['채용공고','채용절차','공개채용','블라인드채용','면접전형','헤드헌팅','인재영입','채용브랜딩'],
     '인재육성': ['임직원교육','기업교육','사내교육','직무교육','hrd','리더십','역량개발','코칭','멘토링','hr세미나'],
+    '채용': ['채용공고','채용절차','공개채용','블라인드채용','면접전형','헤드헌팅','인재영입','채용브랜딩'],
     '조직문화': ['조직문화','번아웃','직원경험','몰입도','워크라이프','기업문화','사회공헌'],
     '근태': ['근태','유연근무','재택근무','연장근로','휴가','근로시간','모성보호','육아휴직'],
+    '평가·보상': ['임금','성과급','연봉','급여','보상체계','통상임금','최저임금','연봉인상','임금체계','성과관리','평가제도','인사평가','kpi','okr'],
   };
   for (const [cat, keywords] of Object.entries(KEYWORDS)) {
     if (keywords.some(k => text.includes(k))) return cat;
   }
-  return '기타';
+  return 'HR Insight';
 }
 
 function scoreNews(newsList) {
@@ -81,13 +85,16 @@ function scoreNews(newsList) {
     let score = 0;
     const titleLower = item.title.toLowerCase();
 
+    // HR AI 키워드 +4점
+    if (AI_KEYWORDS.some(k => titleLower.includes(k))) score += 4;
+
     // 법/판례/정책 키워드 +3점
     if (LAW_KEYWORDS.some(k => titleLower.includes(k.toLowerCase()))) score += 3;
 
     // 트렌드 키워드 +2점
     if (TREND_KEYWORDS.some(k => titleLower.includes(k.toLowerCase()))) score += 2;
 
-    // 중복 보도 점수 — 여러 매체가 다룬 주제 +3점
+    // 중복 보도 점수
     const myWords = new Set(titleWords[i]);
     let dupCount = 0;
     titleWords.forEach((words, j) => {
@@ -191,10 +198,10 @@ module.exports = async function handler(req, res) {
     const top3 = pickTop3(news);
 
     const keywords = [...new Set(
-      news.map(n => n.cat).filter(c => c !== '기타')
+      news.map(n => n.cat).filter(c => c !== 'HR Insight')
     )].slice(0, 5);
 
-    let message = `📋 *HR 이슈 브리핑 — ${today}*\n\n`;
+    let message = `📡 *HR Radar 브리핑 — ${today}*\n\n`;
     message += `🔑 *오늘의 주요 분야*: ${keywords.join(' · ')}\n`;
     message += `📰 *수집된 뉴스*: 총 ${news.length}건\n\n`;
     message += `━━━━━━━━━━━━━━━━\n`;
@@ -207,7 +214,7 @@ module.exports = async function handler(req, res) {
     });
 
     message += `━━━━━━━━━━━━━━━━\n`;
-    message += `👉 <https://hr-news-monitor.vercel.app|전체 뉴스 보기>`;
+    message += `👉 <https://hr-news-monitor.vercel.app|HR Radar 전체 뉴스 보기>`;
 
     await sendSlack(message);
     res.status(200).json({ ok: true, sent: top3.length });
