@@ -294,8 +294,45 @@ function onPerPageChange() {
   renderList();
 }
 
-async function loadNews() {
+const CACHE_KEY = 'hr-radar-news';
+const CACHE_TIME_KEY = 'hr-radar-news-time';
+const CACHE_DURATION = 1000 * 60 * 60 * 3; // 3시간
+
+function saveCache(news) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(news));
+    localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+  } catch(e) {}
+}
+
+function loadCache() {
+  try {
+    const time = parseInt(localStorage.getItem(CACHE_TIME_KEY) || '0');
+    const news = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if (news && Date.now() - time < CACHE_DURATION) return news;
+  } catch(e) {}
+  return null;
+}
+
+async function loadNews(forceRefresh = false) {
   const btn = document.getElementById('refresh-btn');
+
+  // 캐시 확인 (강제 새로고침 아닐 때)
+  if (!forceRefresh) {
+    const cached = loadCache();
+    if (cached) {
+      allNews = cached;
+      btn.disabled = false;
+      btn.textContent = '새로고침';
+      currentPage = 1;
+      renderList();
+
+      // 백그라운드에서 조용히 새 기사 업데이트
+      fetchAndUpdate();
+      return;
+    }
+  }
+
   btn.disabled = true; btn.textContent = '불러오는 중...';
   document.getElementById('news-list').innerHTML =
     '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
