@@ -248,14 +248,29 @@ const KEYWORDS = {
   '근태': ['근태','유연근무','재택근무','연장근로','휴가','근로시간','모성보호','육아휴직'],
   '평가·보상': ['임금','성과급','연봉','급여','보상체계','통상임금','최저임금','연봉인상','임금체계','성과관리','평가제도','인사평가','kpi','okr'],
 };
-const EXCLUDE_KEYWORDS = ['선거','후보','정당','국회','의원','대통령','정치','보수','진보','야당','여당','주가','코스피','환율','증권','부동산','아파트','암세포','장학','장학생','중학교','고등학교','초등학교','청소년','입시','수능','지역인재','드림플러스','인베스터','스마트팜','농업','귀농','봉사'];
-const HR_MUST = ['hr','인사관리','인사팀','노무','채용','임금','근로','직원','직장','조직','고용','역량','성과','연봉','급여','근태','휴가','해고','노사','취업규칙','판례','행정해석','인재관리','헤드헌팅','임직원교육','기업교육','사내교육','직무교육','보상체계','근로감독','모성보호','육아휴직','hr테크','hr data','hr analytics','hr trend','인사조직','인사노무'];
+
+const EXCLUDE_KEYWORDS = [
+  '선거','후보','정당','국회','의원','대통령','정치','보수','진보',
+  '야당','여당','주가','코스피','환율','증권','부동산','아파트','암세포',
+  '장학','장학생','중학교','고등학교','초등학교','청소년','입시','수능',
+  '지역인재','드림플러스','인베스터','스마트팜','농업','귀농','봉사'
+];
+
+const HR_MUST = [
+  'hr','인사관리','인사팀','노무','채용','임금','근로','직원','직장','조직',
+  '고용','역량','성과','연봉','급여','근태','휴가','해고','노사',
+  '취업규칙','판례','행정해석','인재관리','헤드헌팅',
+  '임직원교육','기업교육','사내교육','직무교육',
+  '보상체계','근로감독','모성보호','육아휴직','hr테크',
+  'hr data','hr analytics','hr trend','인사조직','인사노무'
+];
 
 function isHRRelated(title, desc) {
   const text = (title + ' ' + desc).toLowerCase();
   if (EXCLUDE_KEYWORDS.some(k => text.includes(k))) return false;
   return HR_MUST.some(k => text.includes(k));
 }
+
 function categorize(title, desc) {
   const text = (title + ' ' + desc).toLowerCase();
   const cats = [];
@@ -264,30 +279,48 @@ function categorize(title, desc) {
   }
   return cats.length > 0 ? cats : ['HR Insight'];
 }
+
 function formatDate(p) {
   if (!p) return '';
   const d = new Date(p);
   if (isNaN(d)) return '';
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
+
 function toYMD(p) {
   if (!p) return '';
   const d = new Date(p);
   if (isNaN(d)) return '';
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+
 function clean(s) {
-  return (s||'').replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'");
+  return (s || '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .trim();
 }
+
 function getBadgeClass(cat) {
-  const m = {'HR Insight':'HR-Insight','HR AI':'HR-AI','노무':'노무','인재육성':'인재육성','채용':'채용','조직문화':'조직문화','근태':'근태','평가·보상':'평가보상'};
-  return m[cat]||'HR-Insight';
+  const m = {
+    'HR Insight': 'HR-Insight', 'HR AI': 'HR-AI',
+    '노무': '노무', '인재육성': '인재육성', '채용': '채용',
+    '조직문화': '조직문화', '근태': '근태', '평가·보상': '평가보상'
+  };
+  return m[cat] || 'HR-Insight';
 }
+
 function resetDate() {
   document.getElementById('date-from').value = '';
   document.getElementById('date-to').value = '';
   renderList();
 }
+
 function onPerPageChange() {
   perPage = parseInt(document.getElementById('per-page').value);
   currentPage = 1;
@@ -296,106 +329,161 @@ function onPerPageChange() {
 
 async function loadNews() {
   const btn = document.getElementById('refresh-btn');
-  btn.disabled = true; btn.textContent = '불러오는 중...';
-  document.getElementById('news-list').innerHTML = '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
+  btn.disabled = true;
+  btn.textContent = '불러오는 중...';
+  document.getElementById('news-list').innerHTML =
+    '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
   document.getElementById('pagination').innerHTML = '';
+
   try {
     const queries = [
-  'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
-  '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
-  '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
-  '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
-  '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
-  '모성보호 제도', '취업규칙 단체협약', '인사평가 KPI',
-  '직무급 임금체계', '근로자성 대법원 판례'];
-    const results = await Promise.all(queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json())));
+      'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
+      '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
+      '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
+      '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
+      '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
+      '모성보호 육아휴직', '취업규칙 단체협약', '인사평가 KPI',
+      '직무급 임금체계', '근로자성 대법원 판례'
+    ];
+
+    const results = await Promise.all(
+      queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
+    );
+
     const seen = new Set();
     allNews = [];
+
     results.forEach(data => {
-      (data.items||[]).forEach(item => {
+      (data.items || []).forEach(item => {
         if (seen.has(item.link)) return;
         seen.add(item.link);
         const title = clean(item.title);
         const desc = clean(item.description);
         if (!isHRRelated(title, desc)) return;
         const cats = categorize(title, desc);
+        const source = item._source || (item.originallink
+          ? new URL(item.originallink).hostname.replace('www.', '')
+          : '뉴스');
         cats.forEach(cat => {
-          allNews.push({ title, desc, link: item.link,
-            source: item._source||(item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스'),
-            date: formatDate(item.pubDate), ymd: toYMD(item.pubDate),
-            pubDate: item.pubDate, cat });
+          allNews.push({
+            title, desc, link: item.link, source,
+            date: formatDate(item.pubDate),
+            ymd: toYMD(item.pubDate),
+            pubDate: item.pubDate, cat
+          });
         });
-    allNews.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+      });
+    });
+
+    allNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
   } catch(e) {
-    document.getElementById('news-list').innerHTML = '<div class="empty">뉴스를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해주세요</small></div>';
-    btn.disabled = false; btn.textContent = '새로고침'; return;
+    document.getElementById('news-list').innerHTML =
+      '<div class="empty">뉴스를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해주세요</small></div>';
+    btn.disabled = false;
+    btn.textContent = '새로고침';
+    return;
   }
-  btn.disabled = false; btn.textContent = '새로고침';
-  currentPage = 1; renderList();
+
+  btn.disabled = false;
+  btn.textContent = '새로고침';
+  currentPage = 1;
+  renderList();
 }
 
 function setTab(el, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active'); currentTab = tab; currentPage = 1; renderList();
+  el.classList.add('active');
+  currentTab = tab;
+  currentPage = 1;
+  renderList();
 }
-function onSearch(val) { currentQuery = val.trim(); currentPage = 1; renderList(); }
+
+function onSearch(val) {
+  currentQuery = val.trim();
+  currentPage = 1;
+  renderList();
+}
+
 function hl(text, q) {
   if (!q) return text;
-  return text.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'), '<mark class="highlight">$1</mark>');
+  return text.replace(
+    new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'),
+    '<mark class="highlight">$1</mark>'
+  );
 }
-function goPage(p) { currentPage = p; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function goPage(p) {
+  currentPage = p;
+  renderList();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 function renderPagination(total) {
   const totalPages = Math.ceil(total / perPage);
   const pg = document.getElementById('pagination');
   if (totalPages <= 1) { pg.innerHTML = ''; return; }
   const max = 7;
-  let start = Math.max(1, currentPage - Math.floor(max/2));
+  let start = Math.max(1, currentPage - Math.floor(max / 2));
   let end = Math.min(totalPages, start + max - 1);
   if (end - start < max - 1) start = Math.max(1, end - max + 1);
-  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
-  if (start > 1) { html += `<button class="page-btn" onclick="goPage(1)">1</button>`; if (start>2) html += `<span class="page-ellipsis">···</span>`; }
-  for (let i = start; i <= end; i++) html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
-  if (end < totalPages) { if (end < totalPages-1) html += `<span class="page-ellipsis">···</span>`; html += `<button class="page-btn" onclick="goPage(${totalPages})">${totalPages}</button>`; }
-  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
+  if (start > 1) {
+    html += `<button class="page-btn" onclick="goPage(1)">1</button>`;
+    if (start > 2) html += `<span class="page-ellipsis">···</span>`;
+  }
+  for (let i = start; i <= end; i++) {
+    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  if (end < totalPages) {
+    if (end < totalPages - 1) html += `<span class="page-ellipsis">···</span>`;
+    html += `<button class="page-btn" onclick="goPage(${totalPages})">${totalPages}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
   pg.innerHTML = html;
 }
 
 function renderList() {
-  function renderList() {
   let list;
   if (currentTab === '전체') {
-    // 전체 탭은 링크 기준으로 중복 제거
     const seen = new Set();
     list = allNews.filter(i => {
       if (seen.has(i.link)) return false;
-      seen.add(i.link); return true;
+      seen.add(i.link);
+      return true;
     });
   } else {
     list = allNews.filter(i => i.cat === currentTab);
   }
+
   const from = document.getElementById('date-from').value;
   const to   = document.getElementById('date-to').value;
   if (from) list = list.filter(i => i.ymd >= from);
   if (to)   list = list.filter(i => i.ymd <= to);
+
   if (currentQuery) {
     const q = currentQuery.toLowerCase();
-    list = list.filter(i => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
+    list = list.filter(i =>
+      i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q)
+    );
   }
+
   const total = list.length;
   const totalPages = Math.ceil(total / perPage) || 1;
   if (currentPage > totalPages) currentPage = totalPages;
+
   const q = currentQuery;
-  const pageItems = list.slice((currentPage-1)*perPage, currentPage*perPage);
+  const pageItems = list.slice((currentPage - 1) * perPage, currentPage * perPage);
 
   document.getElementById('count-label').textContent =
-    (currentTab==='전체'?'전체':currentTab) + ' ' + total + '건' +
+    (currentTab === '전체' ? '전체' : currentTab) + ' ' + total + '건' +
     (q ? ` — "${q}" 검색 결과` : '') +
     (totalPages > 1 ? `  (${currentPage}/${totalPages} 페이지)` : '');
 
   if (!pageItems.length) {
     document.getElementById('news-list').innerHTML = '<div class="empty">검색 결과가 없습니다.</div>';
-    document.getElementById('pagination').innerHTML = ''; return;
+    document.getElementById('pagination').innerHTML = '';
+    return;
   }
 
   document.getElementById('news-list').innerHTML = pageItems.map(item => `
@@ -405,8 +493,10 @@ function renderList() {
         <span class="card-source">${item.source}</span>
         <span class="card-date">${item.date}</span>
       </div>
-      <div class="card-title"><a href="${item.link}" target="_blank" onclick="event.stopPropagation()">${hl(item.title,q)}</a></div>
-      <div class="card-desc">${hl(item.desc,q)}</div>
+      <div class="card-title">
+        <a href="${item.link}" target="_blank" onclick="event.stopPropagation()">${hl(item.title, q)}</a>
+      </div>
+      <div class="card-desc">${hl(item.desc, q)}</div>
     </div>`).join('');
 
   renderPagination(total);
