@@ -386,8 +386,46 @@ async function loadNews(forceRefresh = false) {
     btn.disabled = false; btn.textContent = '새로고침'; return;
   }
 
+ saveCache(allNews);
   btn.disabled = false; btn.textContent = '새로고침';
   currentPage = 1; renderList();
+}
+
+async function fetchAndUpdate() {
+  try {
+    const queries = [
+      'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
+      '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
+      '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
+      '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
+      '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
+      '모성보호 육아휴직', '취업규칙 단체협약', '인사평가 KPI',
+      '직무급 임금체계', '근로자성 대법원 판례'
+    ];
+    const results = await Promise.all(
+      queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
+    );
+    const seen = new Set();
+    const newNews = [];
+    results.forEach(data => {
+      (data.items || []).forEach(item => {
+        if (seen.has(item.link)) return;
+        seen.add(item.link);
+        const title = clean(item.title);
+        const desc = clean(item.description);
+        if (!isHRRelated(title, desc)) return;
+        const cats = getCats(title, desc);
+        const source = item._source || (item.originallink
+          ? new URL(item.originallink).hostname.replace('www.', '') : '뉴스');
+        newNews.push({ title, desc, link: item.link, source,
+          date: formatDate(item.pubDate), ymd: toYMD(item.pubDate),
+          pubDate: item.pubDate, cats });
+      });
+    });
+    newNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+    allNews = newNews;
+    saveCache(allNews);
+  } catch(e) {}
 }
 
 function setTab(el, tab) {
