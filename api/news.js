@@ -1,18 +1,5 @@
 const RSS_SOURCES = [
   { url: 'https://www.moel.go.kr/rss/lawinfo.do', source: '고용노동부(입법예고)', cat: '노무' },
-  { url: 'https://news.google.com/rss/search?q=근로기준법+판례+행정해석&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '노무' },
-  { url: 'https://news.google.com/rss/search?q=부당해고+노사관계+단체협약&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '노무' },
-  { url: 'https://news.google.com/rss/search?q=고용노동부+행정해석+지침&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '노무' },
-  { url: 'https://news.google.com/rss/search?q=통상임금+성과급+임금체계&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '평가·보상' },
-  { url: 'https://news.google.com/rss/search?q=연봉인상+보상체계+직무급&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '평가·보상' },
-  { url: 'https://news.google.com/rss/search?q=HR+AI+인사관리+테크&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR AI' },
-  { url: 'https://news.google.com/rss/search?q=AI+채용+면접+HR테크&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR AI' },
-  { url: 'https://news.google.com/rss/search?q=채용트렌드+헤드헌팅+인재영입&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '채용' },
-  { url: 'https://news.google.com/rss/search?q=임직원교육+기업교육+리더십개발&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '인재육성' },
-  { url: 'https://news.google.com/rss/search?q=조직문화+직원경험+번아웃&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '조직문화' },
-  { url: 'https://news.google.com/rss/search?q=유연근무+육아휴직+모성보호&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '근태' },
-  { url: 'https://news.google.com/rss/search?q=HR전략+인사전략+HRBP+조직설계&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR Insight' },
-  { url: 'https://news.google.com/rss/search?q=HR트렌드+인사조직+인력계획&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR Insight' },
 ];
 
 async function fetchRSS(source) {
@@ -25,40 +12,21 @@ async function fetchRSS(source) {
       const titleMatch = block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) ||
                          block.match(/<title>([\s\S]*?)<\/title>/);
       const title = (titleMatch?.[1] || '').replace(/<[^>]+>/g, '').trim();
-
       const linkMatch = block.match(/<link>([\s\S]*?)<\/link>/);
       const link = linkMatch?.[1]?.trim() || '';
-
-      // 구글뉴스 source 태그에서 매체명 추출
-      const sourceMatch = block.match(/<source[^>]*>([\s\S]*?)<\/source>/);
-      const mediaName = sourceMatch?.[1]?.replace(/<[^>]+>/g,'').trim() || source.source;
-
-      // description에서 HTML 완전 제거
       const descMatch = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) ||
                         block.match(/<description>([\s\S]*?)<\/description>/);
-      const desc = (descMatch?.[1] || '')
-        .replace(/<a[^>]*>[\s\S]*?<\/a>/gi, '')
-        .replace(/<[^>]+>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&quot;/g, '"')
-        .replace(/&amp;/g, '&')
-        .trim()
-        .slice(0, 200) || title;
-
+      const desc = (descMatch?.[1] || '').replace(/<[^>]+>/g, '').trim().slice(0, 200) || title;
       const dateMatch = block.match(/<dc:date>([\s\S]*?)<\/dc:date>/) ||
                         block.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
       const pubDate = dateMatch?.[1]?.trim() || new Date().toUTCString();
-
       if (title && link) {
-        items.push({
-          title, description: desc, link, originallink: link,
-          pubDate, _source: mediaName, _cat: source.cat
-        });
+        items.push({ title, description: desc, link, originallink: link, pubDate, _source: source.source, _cat: source.cat });
       }
     }
     return items;
   } catch(e) {
-    console.error('RSS fetch error:', source.url, e.message);
+    console.error('RSS error:', e.message);
     return [];
   }
 }
