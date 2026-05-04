@@ -12,7 +12,9 @@ const RSS_SOURCES = [
   { url: 'https://news.google.com/rss/search?q=조직문화+직원경험+번아웃&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '조직문화' },
   { url: 'https://news.google.com/rss/search?q=유연근무+육아휴직+모성보호&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '근태' },
   { url: 'https://news.google.com/rss/search?q=HR전략+인사전략+HRBP+조직설계&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR Insight' },
-  { url: 'https://news.google.com/rss/search?q=HR트렌드+인사조직+인력계획&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR Insight' }
+  { url: 'https://news.google.com/rss/search?q=HR트렌드+인사조직+인력계획&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR Insight' },
+  { url: 'https://news.google.com/rss/search?q=이레이버+HR+인사노무&hl=ko&gl=KR&ceid=KR:ko', source: '이레이버', cat: '노무' },
+  { url: 'https://news.google.com/rss/search?q=site:elabor.co.kr&hl=ko&gl=KR&ceid=KR:ko', source: '이레이버', cat: 'HR Insight' }
 ];
 
 async function fetchRSS(source) {
@@ -52,84 +54,6 @@ async function fetchRSS(source) {
   }
 }
 
-async function fetchELabor() {
-  try {
-    const res = await fetch('https://www.elabor.co.kr/report/index.asp?inx=1&pType=list', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'ko-KR,ko;q=0.9',
-      }
-    });
-
-    const buffer = await res.arrayBuffer();
-    const decoder = new TextDecoder('euc-kr');
-    const html = decoder.decode(buffer);
-
-    const items = [];
-
-    // 카테고리 매핑
-    const catMap = {
-      '인사전략': 'HR Insight',
-      '노무이슈': '노무',
-      '임금이슈': '평가·보상',
-      '채용이슈': '채용',
-      '조직문화': '조직문화',
-      '근태관리': '근태',
-      '직장내이슈': 'HR Insight',
-      '노무실무정보': '노무',
-    };
-
-    // 제목과 링크 추출
-    const linkRegex = /href="(\/report\/view\.asp[^"]+)"[^>]*>[\s\S]*?<img[^>]*>\s*<\/a>\s*[\s\S]*?<a[^>]*>([\s\S]*?)<\/a>/gi;
-    const titleRegex = /<dt[^>]*>([\s\S]*?)<\/dt>[\s\S]*?<dd[^>]*class="[^"]*cate[^"]*"[^>]*>([\s\S]*?)<\/dd>[\s\S]*?href="(\/report\/view\.asp[^"]*)"[^>]*>\s*([\s\S]*?)\s*<\/a>/gi;
-
-    // 더 단순한 방식으로 파싱
-    const blocks = html.split('report/view.asp');
-    for (let i = 1; i < blocks.length && items.length < 15; i++) {
-      const block = blocks[i];
-
-      // 링크 추출
-      const urlMatch = block.match(/^([^"]*)/);
-      const url = urlMatch ? 'https://www.elabor.co.kr/report/view.asp' + urlMatch[1].split('"')[0] : '';
-
-      // 제목 추출 (한글 텍스트 찾기)
-      const titleMatch = block.match(/>\s*([가-힣][^<]{5,80})\s*</);
-      const title = titleMatch?.[1]?.trim() || '';
-
-      // 카테고리 추출
-      const catMatch = block.match(/cate[^>]*>([^<]+)</);
-      const catKr = catMatch?.[1]?.trim() || '';
-      const cat = catMap[catKr] || 'HR Insight';
-
-      // 날짜 추출
-      const dateMatch = block.match(/(\d{4}\.\d{2}\.\d{2})/);
-      const dateStr = dateMatch?.[1] || '';
-      const pubDate = dateStr ? new Date(dateStr.replace(/\./g, '-')).toUTCString() : new Date().toUTCString();
-
-      if (title && url && title.length > 5) {
-        const isDup = items.some(i => i.link === url);
-        if (!isDup) {
-          items.push({
-            title,
-            description: title,
-            link: url,
-            originallink: url,
-            pubDate,
-            _source: '이레이버',
-            _cat: cat
-          });
-        }
-      }
-    }
-
-    return items;
-  } catch(e) {
-    console.error('eLabor fetch error:', e.message);
-    return [];
-  }
-}
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -149,14 +73,11 @@ module.exports = async function handler(req, res) {
     const naverData = await naverRes.json();
     const naverItems = naverData.items || [];
 
-    // RSS 소스들
+    // RSS + 구글뉴스 소스들
     const rssResults = await Promise.all(RSS_SOURCES.map(fetchRSS));
     const rssItems = rssResults.flat();
 
-    // 이레이버 크롤링
-    const elaborItems = await fetchELabor();
-
-    const allItems = [...naverItems, ...rssItems, ...elaborItems];
+    const allItems = [...naverItems, ...rssItems];
     res.status(200).json({ items: allItems, total: allItems.length });
 
   } catch(e) {
