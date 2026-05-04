@@ -64,11 +64,9 @@ module.exports = async function handler(req, res) {
     const naverData = await naverRes.json();
     const naverItems = naverData.items || [];
 
-    // 고용노동부 RSS (query 없을 때만 추가)
-    let rssItems = [];
-    if (!req.query.query) {
-      const rssResults = await Promise.all(RSS_SOURCES.map(fetchRSS));
-      rssItems = rssResults.flat();
+   // 고용노동부 RSS 항상 추가
+    const rssResults = await Promise.all(RSS_SOURCES.map(fetchRSS));
+    const rssItems = rssResults.flat();
     }
 
     // 합치기
