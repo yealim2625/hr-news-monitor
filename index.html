@@ -48,7 +48,6 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text-primary); transition: background var(--transition), color var(--transition); min-height: 100vh; }
-
   .header { background: var(--bg-header); padding: 1.25rem 1.5rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 24px rgba(60,52,137,0.25); }
   .header-inner { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
   .header-logo { font-size: 22px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; letter-spacing: -0.3px; }
@@ -59,15 +58,12 @@
   .date-badge { font-size: 12px; color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.12); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
   .dark-toggle { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 34px; height: 34px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background var(--transition); color: #fff; }
   .dark-toggle:hover { background: rgba(255,255,255,0.22); }
-
   .container { max-width: 800px; margin: 0 auto; padding: 1.25rem 1rem 2rem; }
-
   .search-wrap { position: relative; margin-bottom: 0.75rem; }
   .search-input { width: 100%; padding: 11px 16px 11px 42px; font-size: 14px; font-family: inherit; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg-card); color: var(--text-primary); outline: none; transition: border-color var(--transition), box-shadow var(--transition); }
   .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,79,207,0.12); }
   .search-input::placeholder { color: var(--text-tertiary); }
   .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); font-size: 15px; pointer-events: none; }
-
   .date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
   .date-row label { font-size: 13px; color: var(--text-secondary); }
   .date-input { padding: 6px 10px; font-size: 13px; font-family: inherit; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-primary); outline: none; transition: border-color var(--transition); }
@@ -75,12 +71,10 @@
   .date-sep { font-size: 13px; color: var(--text-tertiary); }
   .date-reset { font-size: 12px; padding: 5px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg-card); color: var(--text-secondary); cursor: pointer; font-family: inherit; transition: all var(--transition); }
   .date-reset:hover { border-color: var(--primary); color: var(--primary); }
-
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; background: var(--tab-bg); padding: 6px; border-radius: 14px; }
   .tab { padding: 7px 14px; font-size: 13px; font-family: inherit; font-weight: 500; border-radius: 10px; border: none; background: transparent; color: var(--tab-text); cursor: pointer; transition: all var(--transition); white-space: nowrap; }
   .tab:hover { background: rgba(91,79,207,0.1); color: var(--primary); }
   .tab.active { background: var(--tab-active-bg); color: var(--tab-active-text); box-shadow: 0 2px 8px rgba(91,79,207,0.3); }
-
   .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .count { font-size: 12px; color: var(--text-tertiary); font-weight: 500; }
   .meta-right { display: flex; align-items: center; gap: 10px; }
@@ -91,13 +85,12 @@
   .refresh-btn { font-size: 13px; font-family: inherit; font-weight: 500; padding: 7px 16px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg-card); color: var(--text-secondary); cursor: pointer; transition: all var(--transition); }
   .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
   .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
   .news-list { display: flex; flex-direction: column; gap: 10px; }
   .news-card { background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 14px; padding: 16px 18px; cursor: pointer; transition: all var(--transition); box-shadow: var(--shadow-card); position: relative; overflow: hidden; }
   .news-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); opacity: 0; transition: opacity var(--transition); border-radius: 14px 0 0 14px; }
   .news-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-hover); transform: translateY(-2px); }
   .news-card:hover::before { opacity: 1; }
-  .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
   .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; letter-spacing: 0.02em; }
   .badge-HR-Insight { background: var(--badge-HR-Insight-bg); color: var(--badge-HR-Insight-text); }
   .badge-HR-AI      { background: var(--badge-HR-AI-bg);      color: var(--badge-HR-AI-text); }
@@ -115,26 +108,19 @@
   .card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.65; }
   .highlight { background: #FAEEDA; color: #633806; border-radius: 3px; padding: 0 2px; }
   [data-theme="dark"] .highlight { background: #3A2A08; color: #F0B870; }
-
   .pagination { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 1.5rem; flex-wrap: wrap; }
   .page-btn { min-width: 34px; height: 34px; padding: 0 10px; font-size: 13px; font-family: inherit; font-weight: 500; border-radius: 9px; border: 1.5px solid var(--border); background: var(--bg-card); color: var(--text-secondary); cursor: pointer; transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
   .page-btn:hover { border-color: var(--primary); color: var(--primary); }
   .page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(91,79,207,0.3); }
   .page-btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
   .page-ellipsis { color: var(--text-tertiary); font-size: 13px; padding: 0 4px; }
-
   .empty, .loading { text-align: center; padding: 3rem 1rem; color: var(--text-tertiary); font-size: 14px; }
   .spinner { display: inline-block; width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   @media (max-width: 540px) {
-    .header { padding: 1rem; }
-    .date-badge { display: none; }
-    .header-logo { font-size: 18px; }
-    .tabs { gap: 4px; padding: 5px; }
-    .tab { padding: 6px 10px; font-size: 12px; }
-    .news-card { padding: 13px 14px; }
-    .container { padding: 1rem 0.75rem 2rem; }
+    .header { padding: 1rem; } .date-badge { display: none; } .header-logo { font-size: 18px; }
+    .tabs { gap: 4px; padding: 5px; } .tab { padding: 6px 10px; font-size: 12px; }
+    .news-card { padding: 13px 14px; } .container { padding: 1rem 0.75rem 2rem; }
     .per-page-label { display: none; }
   }
 </style>
@@ -144,9 +130,7 @@
 <div class="header">
   <div class="header-inner">
     <div>
-      <div class="header-logo">
-        <span class="radar-icon">📡</span> HR Radar
-      </div>
+      <div class="header-logo"><span class="radar-icon">📡</span> HR Radar</div>
       <div class="header-sub">매일 아침 HR 주요 뉴스 · 판례 · 행정해석을 한눈에</div>
     </div>
     <div class="header-right">
@@ -163,7 +147,6 @@
       placeholder="제목·내용으로 검색 (예: 채용, 휴직제도, 판례)"
       oninput="onSearch(this.value)" />
   </div>
-
   <div class="date-row">
     <label>기간</label>
     <input class="date-input" type="date" id="date-from" onchange="renderList()" />
@@ -171,7 +154,6 @@
     <input class="date-input" type="date" id="date-to" onchange="renderList()" />
     <button class="date-reset" onclick="resetDate()">전체 기간</button>
   </div>
-
   <div class="tabs">
     <button class="tab active" onclick="setTab(this,'전체')">전체</button>
     <button class="tab" onclick="setTab(this,'HR Insight')">HR Insight</button>
@@ -183,7 +165,6 @@
     <button class="tab" onclick="setTab(this,'근태')">근태</button>
     <button class="tab" onclick="setTab(this,'평가·보상')">평가·보상</button>
   </div>
-
   <div class="meta-row">
     <span class="count" id="count-label">불러오는 중...</span>
     <div class="meta-right">
@@ -199,11 +180,9 @@
       <button class="refresh-btn" id="refresh-btn" onclick="loadNews()">새로고침</button>
     </div>
   </div>
-
   <div class="news-list" id="news-list">
     <div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>
   </div>
-
   <div class="pagination" id="pagination"></div>
 </div>
 
@@ -213,6 +192,8 @@
 </footer>
 
 <script>
+// allNews: 기사 하나당 하나의 객체, cats 배열로 복수 카테고리 보유
+// 예: { title, desc, link, source, date, ymd, pubDate, cats: ['HR AI', '채용'] }
 let allNews = [];
 let currentTab = '전체';
 let currentQuery = '';
@@ -239,14 +220,14 @@ function toggleDark() {
 })();
 
 const KEYWORDS = {
-  'HR AI': ['ai hr','hr ai','hr테크','hr tech','hr data','hr analytics','ai 채용','ai 면접','챗gpt','생성ai'],
+  'HR AI':    ['ai hr','hr ai','hr테크','hr tech','hr data','hr analytics','ai 채용','ai 면접','챗gpt','생성ai'],
   'HR Insight': ['hr전략','인사전략','hrbp','조직설계','인력계획','hr혁신','인사조직개편'],
-  '노무': ['노무','근로기준법','판례','행정해석','부당해고','노사관계','단체협약','취업규칙','임금체불','해고','근로감독','인사노무'],
+  '노무':     ['노무','근로기준법','판례','행정해석','부당해고','노사관계','단체협약','취업규칙','임금체불','해고','근로감독','인사노무'],
   '인재육성': ['임직원교육','기업교육','사내교육','직무교육','hrd','리더십','역량개발','코칭','멘토링','hr세미나'],
-  '채용': ['채용공고','채용절차','공개채용','블라인드채용','면접전형','헤드헌팅','인재영입','채용브랜딩'],
+  '채용':     ['채용공고','채용절차','공개채용','블라인드채용','면접전형','헤드헌팅','인재영입','채용브랜딩'],
   '조직문화': ['조직문화','번아웃','직원경험','몰입도','워크라이프','기업문화','사회공헌'],
-  '근태': ['근태','유연근무','재택근무','연장근로','휴가','근로시간','모성보호','육아휴직'],
-  '평가·보상': ['임금','성과급','연봉','급여','보상체계','통상임금','최저임금','연봉인상','임금체계','성과관리','평가제도','인사평가','kpi','okr'],
+  '근태':     ['근태','유연근무','재택근무','연장근로','휴가','근로시간','모성보호','육아휴직'],
+  '평가·보상':['임금','성과급','연봉','급여','보상체계','통상임금','최저임금','연봉인상','임금체계','성과관리','평가제도','인사평가','kpi','okr'],
 };
 
 const EXCLUDE_KEYWORDS = [
@@ -271,7 +252,8 @@ function isHRRelated(title, desc) {
   return HR_MUST.some(k => text.includes(k));
 }
 
-function categorize(title, desc) {
+// 복수 카테고리 반환
+function getCats(title, desc) {
   const text = (title + ' ' + desc).toLowerCase();
   const cats = [];
   for (const [cat, kws] of Object.entries(KEYWORDS)) {
@@ -286,41 +268,26 @@ function formatDate(p) {
   if (isNaN(d)) return '';
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
-
 function toYMD(p) {
   if (!p) return '';
   const d = new Date(p);
   if (isNaN(d)) return '';
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-
 function clean(s) {
-  return (s || '')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .trim();
+  return (s||'').replace(/<[^>]+>/g,'').replace(/&quot;/g,'"').replace(/&amp;/g,'&')
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&nbsp;/g,' ').trim();
 }
-
 function getBadgeClass(cat) {
-  const m = {
-    'HR Insight': 'HR-Insight', 'HR AI': 'HR-AI',
-    '노무': '노무', '인재육성': '인재육성', '채용': '채용',
-    '조직문화': '조직문화', '근태': '근태', '평가·보상': '평가보상'
-  };
-  return m[cat] || 'HR-Insight';
+  const m = {'HR Insight':'HR-Insight','HR AI':'HR-AI','노무':'노무','인재육성':'인재육성',
+    '채용':'채용','조직문화':'조직문화','근태':'근태','평가·보상':'평가보상'};
+  return m[cat]||'HR-Insight';
 }
-
 function resetDate() {
   document.getElementById('date-from').value = '';
   document.getElementById('date-to').value = '';
   renderList();
 }
-
 function onPerPageChange() {
   perPage = parseInt(document.getElementById('per-page').value);
   currentPage = 1;
@@ -329,8 +296,7 @@ function onPerPageChange() {
 
 async function loadNews() {
   const btn = document.getElementById('refresh-btn');
-  btn.disabled = true;
-  btn.textContent = '불러오는 중...';
+  btn.disabled = true; btn.textContent = '불러오는 중...';
   document.getElementById('news-list').innerHTML =
     '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
   document.getElementById('pagination').innerHTML = '';
@@ -360,17 +326,17 @@ async function loadNews() {
         const title = clean(item.title);
         const desc = clean(item.description);
         if (!isHRRelated(title, desc)) return;
-        const cats = categorize(title, desc);
+        const cats = getCats(title, desc);
         const source = item._source || (item.originallink
           ? new URL(item.originallink).hostname.replace('www.', '')
           : '뉴스');
-        cats.forEach(cat => {
-          allNews.push({
-            title, desc, link: item.link, source,
-            date: formatDate(item.pubDate),
-            ymd: toYMD(item.pubDate),
-            pubDate: item.pubDate, cat
-          });
+        // 기사 하나당 객체 하나, cats 배열로 복수 카테고리 저장
+        allNews.push({
+          title, desc, link: item.link, source,
+          date: formatDate(item.pubDate),
+          ymd: toYMD(item.pubDate),
+          pubDate: item.pubDate,
+          cats  // 복수 카테고리 배열
         });
       });
     });
@@ -380,80 +346,49 @@ async function loadNews() {
   } catch(e) {
     document.getElementById('news-list').innerHTML =
       '<div class="empty">뉴스를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해주세요</small></div>';
-    btn.disabled = false;
-    btn.textContent = '새로고침';
-    return;
+    btn.disabled = false; btn.textContent = '새로고침'; return;
   }
 
-  btn.disabled = false;
-  btn.textContent = '새로고침';
-  currentPage = 1;
-  renderList();
+  btn.disabled = false; btn.textContent = '새로고침';
+  currentPage = 1; renderList();
 }
 
 function setTab(el, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  currentTab = tab;
-  currentPage = 1;
-  renderList();
+  el.classList.add('active'); currentTab = tab; currentPage = 1; renderList();
 }
-
-function onSearch(val) {
-  currentQuery = val.trim();
-  currentPage = 1;
-  renderList();
-}
-
+function onSearch(val) { currentQuery = val.trim(); currentPage = 1; renderList(); }
 function hl(text, q) {
   if (!q) return text;
-  return text.replace(
-    new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'),
-    '<mark class="highlight">$1</mark>'
-  );
+  return text.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),
+    '<mark class="highlight">$1</mark>');
 }
-
-function goPage(p) {
-  currentPage = p;
-  renderList();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+function goPage(p) { currentPage = p; renderList(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function renderPagination(total) {
   const totalPages = Math.ceil(total / perPage);
   const pg = document.getElementById('pagination');
   if (totalPages <= 1) { pg.innerHTML = ''; return; }
   const max = 7;
-  let start = Math.max(1, currentPage - Math.floor(max / 2));
+  let start = Math.max(1, currentPage - Math.floor(max/2));
   let end = Math.min(totalPages, start + max - 1);
   if (end - start < max - 1) start = Math.max(1, end - max + 1);
-  let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
-  if (start > 1) {
-    html += `<button class="page-btn" onclick="goPage(1)">1</button>`;
-    if (start > 2) html += `<span class="page-ellipsis">···</span>`;
-  }
-  for (let i = start; i <= end; i++) {
-    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
-  }
-  if (end < totalPages) {
-    if (end < totalPages - 1) html += `<span class="page-ellipsis">···</span>`;
-    html += `<button class="page-btn" onclick="goPage(${totalPages})">${totalPages}</button>`;
-  }
-  html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  if (start > 1) { html += `<button class="page-btn" onclick="goPage(1)">1</button>`; if (start>2) html += `<span class="page-ellipsis">···</span>`; }
+  for (let i = start; i <= end; i++) html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  if (end < totalPages) { if (end<totalPages-1) html += `<span class="page-ellipsis">···</span>`; html += `<button class="page-btn" onclick="goPage(${totalPages})">${totalPages}</button>`; }
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
   pg.innerHTML = html;
 }
 
 function renderList() {
   let list;
   if (currentTab === '전체') {
-    const seen = new Set();
-    list = allNews.filter(i => {
-      if (seen.has(i.link)) return false;
-      seen.add(i.link);
-      return true;
-    });
+    // 전체: 기사 그대로, 중복 없음 (이미 seen으로 처리)
+    list = allNews;
   } else {
-    list = allNews.filter(i => i.cat === currentTab);
+    // 카테고리 탭: cats 배열에 해당 카테고리 포함된 기사만
+    list = allNews.filter(i => i.cats.includes(currentTab));
   }
 
   const from = document.getElementById('date-from').value;
@@ -463,40 +398,36 @@ function renderList() {
 
   if (currentQuery) {
     const q = currentQuery.toLowerCase();
-    list = list.filter(i =>
-      i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q)
-    );
+    list = list.filter(i => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
   }
 
   const total = list.length;
   const totalPages = Math.ceil(total / perPage) || 1;
   if (currentPage > totalPages) currentPage = totalPages;
-
   const q = currentQuery;
-  const pageItems = list.slice((currentPage - 1) * perPage, currentPage * perPage);
+  const pageItems = list.slice((currentPage-1)*perPage, currentPage*perPage);
 
   document.getElementById('count-label').textContent =
-    (currentTab === '전체' ? '전체' : currentTab) + ' ' + total + '건' +
+    (currentTab==='전체'?'전체':currentTab) + ' ' + total + '건' +
     (q ? ` — "${q}" 검색 결과` : '') +
     (totalPages > 1 ? `  (${currentPage}/${totalPages} 페이지)` : '');
 
   if (!pageItems.length) {
     document.getElementById('news-list').innerHTML = '<div class="empty">검색 결과가 없습니다.</div>';
-    document.getElementById('pagination').innerHTML = '';
-    return;
+    document.getElementById('pagination').innerHTML = ''; return;
   }
 
   document.getElementById('news-list').innerHTML = pageItems.map(item => `
     <div class="news-card" onclick="window.open('${item.link}','_blank')">
       <div class="card-top">
-        <span class="badge badge-${getBadgeClass(item.cat)}">${item.cat}</span>
+        ${item.cats.map(c => `<span class="badge badge-${getBadgeClass(c)}">${c}</span>`).join('')}
         <span class="card-source">${item.source}</span>
         <span class="card-date">${item.date}</span>
       </div>
       <div class="card-title">
-        <a href="${item.link}" target="_blank" onclick="event.stopPropagation()">${hl(item.title, q)}</a>
+        <a href="${item.link}" target="_blank" onclick="event.stopPropagation()">${hl(item.title,q)}</a>
       </div>
-      <div class="card-desc">${hl(item.desc, q)}</div>
+      <div class="card-desc">${hl(item.desc,q)}</div>
     </div>`).join('');
 
   renderPagination(total);
