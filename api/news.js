@@ -1,5 +1,9 @@
 const RSS_SOURCES = [
-  { url: 'https://www.moel.go.kr/rss/lawinfo.do', source: '고용노동부(입법예고)', cat: '노무' }
+  { url: 'https://www.moel.go.kr/rss/lawinfo.do', source: '고용노동부(입법예고)', cat: '노무' },
+  { url: 'https://news.google.com/rss/search?q=HR+인사관리+판례&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '노무' },
+  { url: 'https://news.google.com/rss/search?q=근로기준법+판례+행정해석&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '노무' },
+  { url: 'https://news.google.com/rss/search?q=임금+성과급+통상임금+판례&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '평가·보상' },
+  { url: 'https://news.google.com/rss/search?q=AI+HR+인사관리+테크&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR AI' }
 ];
 
 async function fetchRSS(source) {
