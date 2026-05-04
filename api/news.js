@@ -1,11 +1,84 @@
 const RSS_SOURCES = [
-  { url: 'https://www.moel.go.kr/rss/lawinfo.do', source: '고용노동부(입법예고)', cat: '노무' },
-  { url: 'https://news.google.com/rss/search?q=HR+인사관리+판례&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '노무' },
-  { url: 'https://news.google.com/rss/search?q=근로기준법+판례+행정해석&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '노무' },
-  { url: 'https://news.google.com/rss/search?q=임금+성과급+통상임금+판례&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: '평가·보상' },
-  { url: 'https://news.google.com/rss/search?q=AI+HR+인사관리+테크&hl=ko&gl=KR&ceid=KR:ko', source: '구글뉴스', cat: 'HR AI' }
+  // 고용노동부 공식
+  {
+    url: 'https://www.moel.go.kr/rss/lawinfo.do',
+    source: '고용노동부(입법예고)',
+    cat: '노무'
+  },
+  // 구글뉴스 - 노무/판례
+  {
+    url: 'https://news.google.com/rss/search?q=근로기준법+판례+행정해석&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '노무'
+  },
+  {
+    url: 'https://news.google.com/rss/search?q=부당해고+노사관계+단체협약&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '노무'
+  },
+  {
+    url: 'https://news.google.com/rss/search?q=고용노동부+행정해석+지침&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '노무'
+  },
+  // 구글뉴스 - 보상/평가
+  {
+    url: 'https://news.google.com/rss/search?q=통상임금+성과급+임금체계&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '평가·보상'
+  },
+  {
+    url: 'https://news.google.com/rss/search?q=연봉인상+보상체계+직무급&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '평가·보상'
+  },
+  // 구글뉴스 - HR AI
+  {
+    url: 'https://news.google.com/rss/search?q=HR+AI+인사관리+테크&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: 'HR AI'
+  },
+  {
+    url: 'https://news.google.com/rss/search?q=AI+채용+면접+HR테크&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: 'HR AI'
+  },
+  // 구글뉴스 - 채용
+  {
+    url: 'https://news.google.com/rss/search?q=채용트렌드+헤드헌팅+인재영입&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '채용'
+  },
+  // 구글뉴스 - 인재육성
+  {
+    url: 'https://news.google.com/rss/search?q=임직원교육+기업교육+리더십개발&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '인재육성'
+  },
+  // 구글뉴스 - 조직문화
+  {
+    url: 'https://news.google.com/rss/search?q=조직문화+직원경험+번아웃&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '조직문화'
+  },
+  // 구글뉴스 - 근태
+  {
+    url: 'https://news.google.com/rss/search?q=유연근무+육아휴직+모성보호&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '근태'
+  },
+  // 구글뉴스 - HR Insight (전략/트렌드)
+  {
+    url: 'https://news.google.com/rss/search?q=HR전략+인사전략+HRBP+조직설계&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: 'HR Insight'
+  },
+  {
+    url: 'https://news.google.com/rss/search?q=HR트렌드+인사조직+인력계획&hl=ko&gl=KR&ceid=KR:ko',
+    source: '구글뉴스',
+    cat: '인사전략'
+  }
 ];
-
 async function fetchRSS(source) {
   try {
     const res = await fetch(source.url);
