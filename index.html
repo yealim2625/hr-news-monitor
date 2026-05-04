@@ -1,76 +1,431 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HR Radar</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --primary: #5B4FCF;
+    --primary-dark: #3C3489;
+    --primary-light: #7B6FDF;
+    --bg: #F4F3FC;
+    --bg-card: #FFFFFF;
+    --bg-header: linear-gradient(135deg, #3C3489 0%, #5B4FCF 60%, #7B6FDF 100%);
+    --border: #E8E6F8;
+    --border-hover: #5B4FCF;
+    --text-primary: #1A1535;
+    --text-secondary: #6B6485;
+    --text-tertiary: #9B94B5;
+    --tab-bg: #EDEAF8;
+    --tab-active-bg: #5B4FCF;
+    --tab-active-text: #FFFFFF;
+    --tab-text: #6B6485;
+    --badge-노무-bg: #E6F1FB; --badge-노무-text: #0C447C;
+    --badge-HR-Insight-bg: #EEEDFE; --badge-HR-Insight-text: #3C3489;
+    --badge-HR-AI-bg: #E1F5EE; --badge-HR-AI-text: #085041;
+    --badge-인재육성-bg: #FAEEDA; --badge-인재육성-text: #633806;
+    --badge-채용-bg: #FBEAF0; --badge-채용-text: #72243E;
+    --badge-조직문화-bg: #FAECE7; --badge-조직문화-text: #712B13;
+    --badge-근태-bg: #F1EFE8; --badge-근태-text: #444441;
+    --badge-평가보상-bg: #EAF3DE; --badge-평가보상-text: #27500A;
+    --shadow-card: 0 2px 12px rgba(91,79,207,0.07);
+    --shadow-hover: 0 8px 28px rgba(91,79,207,0.15);
+    --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  [data-theme="dark"] {
+    --bg: #12101F;
+    --bg-card: #1E1A35;
+    --border: #2E2850;
+    --border-hover: #7B6FDF;
+    --text-primary: #EDE9FF;
+    --text-secondary: #A099CC;
+    --text-tertiary: #6B6485;
+    --tab-bg: #1E1A35;
+    --tab-active-bg: #5B4FCF;
+    --tab-active-text: #FFFFFF;
+    --tab-text: #A099CC;
+    --badge-노무-bg: #0C2040; --badge-노무-text: #7BB8F0;
+    --badge-HR-Insight-bg: #1A1640; --badge-HR-Insight-text: #A99CF0;
+    --badge-HR-AI-bg: #0A2018; --badge-HR-AI-text: #5CC9A0;
+    --badge-인재육성-bg: #2A1A08; --badge-인재육성-text: #F0B870;
+    --badge-채용-bg: #280A18; --badge-채용-text: #F090B0;
+    --badge-조직문화-bg: #280E08; --badge-조직문화-text: #F0906A;
+    --badge-근태-bg: #1A1810; --badge-근태-text: #C0BC98;
+    --badge-평가보상-bg: #0A1E04; --badge-평가보상-text: #88C870;
+    --shadow-card: 0 2px 12px rgba(0,0,0,0.3);
+    --shadow-hover: 0 8px 28px rgba(0,0,0,0.4);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: #f5f5f0; color: #1a1a1a; }
-  .header { background: #fff; border-bottom: 1px solid #e5e5e0; padding: 1.25rem 1.5rem; }
-  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
-  .header p { font-size: 13px; color: #888; margin-top: 3px; }
-  .container { max-width: 800px; margin: 0 auto; padding: 1.25rem 1rem; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    transition: background var(--transition), color var(--transition);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--bg-header);
+    padding: 1.25rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(60,52,137,0.25);
+  }
+
+  .header-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 10px; }
+
+  .header-logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .radar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    font-size: 20px;
+    animation: pulse 2.5s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(255,255,255,0.4);
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.5); transform: scale(1); }
+    50% { box-shadow: 0 0 0 10px rgba(255,255,255,0); transform: scale(1.08); }
+    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); transform: scale(1); }
+  }
+
+  .header-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 2px;
+  }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .date-badge {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.12);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .dark-toggle {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition);
+    color: #fff;
+  }
+  .dark-toggle:hover { background: rgba(255,255,255,0.22); }
+
+  /* CONTAINER */
+  .container { max-width: 800px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+
+  /* SEARCH */
   .search-wrap { position: relative; margin-bottom: 0.75rem; }
-  .search-wrap input[type="text"] { width: 100%; padding: 10px 16px 10px 38px; font-size: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; outline: none; }
-  .search-wrap input:focus { border-color: #999; }
-  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 15px; }
-  .date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-  .date-row label { font-size: 13px; color: #888; }
-  .date-row input[type="date"] { padding: 6px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; background: #fff; outline: none; color: #1a1a1a; }
-  .date-row input[type="date"]:focus { border-color: #999; }
-  .date-sep { font-size: 13px; color: #aaa; }
-  .date-reset { font-size: 12px; padding: 5px 10px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #888; cursor: pointer; }
-  .date-reset:hover { background: #f0f0f0; }
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
-  .tab { padding: 6px 14px; font-size: 13px; border-radius: 20px; border: 1px solid #ddd; background: #fff; color: #555; cursor: pointer; }
-  .tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-  .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .count { font-size: 12px; color: #aaa; }
-  .refresh-btn { font-size: 13px; padding: 6px 14px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; color: #555; }
+  .search-input {
+    width: 100%;
+    padding: 11px 16px 11px 42px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(91,79,207,0.12);
+  }
+  .search-input::placeholder { color: var(--text-tertiary); }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    font-size: 15px;
+    pointer-events: none;
+  }
+
+  /* DATE ROW */
+  .date-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .date-row label { font-size: 13px; color: var(--text-secondary); }
+  .date-input {
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color var(--transition);
+  }
+  .date-input:focus { border-color: var(--primary); }
+  .date-sep { font-size: 13px; color: var(--text-tertiary); }
+  .date-reset {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+  }
+  .date-reset:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    background: var(--tab-bg);
+    padding: 6px;
+    border-radius: 14px;
+  }
+  .tab {
+    padding: 7px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--tab-text);
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .tab:hover { background: rgba(91,79,207,0.1); color: var(--primary); }
+  .tab.active {
+    background: var(--tab-active-bg);
+    color: var(--tab-active-text);
+    box-shadow: 0 2px 8px rgba(91,79,207,0.3);
+  }
+
+  /* META ROW */
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .count { font-size: 12px; color: var(--text-tertiary); font-weight: 500; }
+  .refresh-btn {
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
   .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .news-list { display: flex; flex-direction: column; gap: 8px; }
-  .news-card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 14px 16px; }
-  .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
-  .badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
-  .badge-HR-Insight { background: #EEEDFE; color: #3C3489; }
-  .badge-HR-AI { background: #E1F5EE; color: #085041; }
-  .badge-노무 { background: #E6F1FB; color: #0C447C; }
-  .badge-인재육성 { background: #FAEEDA; color: #633806; }
-  .badge-채용 { background: #FBEAF0; color: #72243E; }
-  .badge-조직문화 { background: #FAECE7; color: #712B13; }
-  .badge-근태 { background: #F1EFE8; color: #444441; }
-  .badge-평가보상 { background: #EAF3DE; color: #27500A; }
-  .card-source { font-size: 12px; color: #aaa; }
-  .card-date { font-size: 12px; color: #aaa; margin-left: auto; }
-  .card-title { font-size: 14px; font-weight: 600; line-height: 1.5; margin-bottom: 4px; }
-  .card-title a { color: #1a1a1a; text-decoration: none; }
-  .card-title a:hover { text-decoration: underline; }
-  .card-desc { font-size: 13px; color: #666; line-height: 1.6; }
-  .highlight { background: #FAEEDA; color: #633806; border-radius: 2px; padding: 0 2px; }
-  .empty { text-align: center; padding: 3rem; color: #aaa; font-size: 14px; }
-  .loading { text-align: center; padding: 2rem; color: #aaa; font-size: 14px; }
-  .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #eee; border-top-color: #888; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 8px; }
+
+  /* NEWS LIST */
+  .news-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .news-card {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .news-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity var(--transition);
+    border-radius: 14px 0 0 14px;
+  }
+  .news-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+  .news-card:hover::before { opacity: 1; }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+    letter-spacing: 0.02em;
+  }
+  .badge-HR-Insight { background: var(--badge-HR-Insight-bg); color: var(--badge-HR-Insight-text); }
+  .badge-HR-AI { background: var(--badge-HR-AI-bg); color: var(--badge-HR-AI-text); }
+  .badge-노무 { background: var(--badge-노무-bg); color: var(--badge-노무-text); }
+  .badge-인재육성 { background: var(--badge-인재육성-bg); color: var(--badge-인재육성-text); }
+  .badge-채용 { background: var(--badge-채용-bg); color: var(--badge-채용-text); }
+  .badge-조직문화 { background: var(--badge-조직문화-bg); color: var(--badge-조직문화-text); }
+  .badge-근태 { background: var(--badge-근태-bg); color: var(--badge-근태-text); }
+  .badge-평가보상 { background: var(--badge-평가보상-bg); color: var(--badge-평가보상-text); }
+
+  .card-source { font-size: 12px; color: var(--text-tertiary); }
+  .card-date {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-left: auto;
+    background: var(--tab-bg);
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.55;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+  }
+  .card-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+  .card-title a:hover { color: var(--primary); }
+  .card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.65; }
+
+  .highlight {
+    background: #FAEEDA;
+    color: #633806;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+  [data-theme="dark"] .highlight { background: #3A2A08; color: #F0B870; }
+
+  /* STATES */
+  .empty, .loading {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-tertiary);
+    font-size: 14px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 10px;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MOBILE */
+  @media (max-width: 540px) {
+    .header { padding: 1rem; }
+    .date-badge { display: none; }
+    .header-logo { font-size: 18px; }
+    .tabs { gap: 4px; padding: 5px; }
+    .tab { padding: 6px 10px; font-size: 12px; }
+    .news-card { padding: 13px 14px; }
+    .container { padding: 1rem 0.75rem 2rem; }
+  }
 </style>
 </head>
 <body>
+
 <div class="header">
-  <h1>📡 HR Radar</h1>
-  <p>매일 아침 HR 주요 뉴스 · 판례 · 행정해석을 한눈에</p>
+  <div class="header-inner">
+    <div class="header-left">
+      <div>
+        <div class="header-logo">
+          <span class="radar-icon">📡</span> HR Radar
+        </div>
+        <div class="header-sub">매일 아침 HR 주요 뉴스 · 판례 · 행정해석을 한눈에</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="date-badge" id="today-date"></span>
+      <button class="dark-toggle" onclick="toggleDark()" title="다크모드 전환">🌙</button>
+    </div>
+  </div>
 </div>
+
 <div class="container">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input type="text" id="search" placeholder="제목·내용으로 검색 (예: 채용, 휴직제도, 판례)" oninput="onSearch(this.value)" />
+    <input class="search-input" type="text" id="search"
+      placeholder="제목·내용으로 검색 (예: 채용, 휴직제도, 판례)"
+      oninput="onSearch(this.value)" />
   </div>
+
   <div class="date-row">
     <label>기간</label>
-    <input type="date" id="date-from" onchange="renderList()" />
+    <input class="date-input" type="date" id="date-from" onchange="renderList()" />
     <span class="date-sep">~</span>
-    <input type="date" id="date-to" onchange="renderList()" />
+    <input class="date-input" type="date" id="date-to" onchange="renderList()" />
     <button class="date-reset" onclick="resetDate()">전체 기간</button>
   </div>
+
   <div class="tabs">
     <button class="tab active" onclick="setTab(this,'전체')">전체</button>
     <button class="tab" onclick="setTab(this,'HR Insight')">HR Insight</button>
@@ -82,18 +437,42 @@
     <button class="tab" onclick="setTab(this,'근태')">근태</button>
     <button class="tab" onclick="setTab(this,'평가·보상')">평가·보상</button>
   </div>
+
   <div class="meta-row">
     <span class="count" id="count-label">불러오는 중...</span>
     <button class="refresh-btn" id="refresh-btn" onclick="loadNews()">새로고침</button>
   </div>
+
   <div class="news-list" id="news-list">
     <div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>
   </div>
 </div>
+
 <script>
 let allNews = [];
 let currentTab = '전체';
 let currentQuery = '';
+
+// 오늘 날짜 표시
+const now = new Date();
+document.getElementById('today-date').textContent =
+  `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+
+// 다크모드
+function toggleDark() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.querySelector('.dark-toggle').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('hr-radar-theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const saved = localStorage.getItem('hr-radar-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.querySelector('.dark-toggle').textContent = '☀️';
+  }
+})();
 
 const KEYWORDS = {
   'HR AI': ['ai hr','hr ai','hr테크','hr tech','hr data','hr analytics','ai 채용','ai 면접','챗gpt','생성ai'],
@@ -139,12 +518,14 @@ function categorize(title, desc) {
 function formatDate(pubDate) {
   if (!pubDate) return '';
   const d = new Date(pubDate);
+  if (isNaN(d)) return '';
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function toYMD(pubDate) {
   if (!pubDate) return '';
   const d = new Date(pubDate);
+  if (isNaN(d)) return '';
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
@@ -163,11 +544,22 @@ function getBadgeClass(cat) {
   return map[cat] || 'HR-Insight';
 }
 
+function clean(str) {
+  return (str || '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;/g, "'");
+}
+
 async function loadNews() {
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
   btn.textContent = '불러오는 중...';
-  document.getElementById('news-list').innerHTML = '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
+  document.getElementById('news-list').innerHTML =
+    '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
 
   try {
     const queries = [
@@ -185,17 +577,17 @@ async function loadNews() {
     const seen = new Set();
     allNews = [];
     results.forEach(data => {
-      const items = data.items || [];
-      items.forEach(item => {
+      (data.items || []).forEach(item => {
         if (seen.has(item.link)) return;
         seen.add(item.link);
-        const title = item.title.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'");
-        const desc = item.description.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'");
+        const title = clean(item.title);
+        const desc = clean(item.description);
         if (!isHRRelated(title, desc)) return;
         allNews.push({
           title, desc, link: item.link,
-          source: item._source || (item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스'),
-          isOfficial: !!item._source,
+          source: item._source || (item.originallink
+            ? new URL(item.originallink).hostname.replace('www.','')
+            : '뉴스'),
           date: formatDate(item.pubDate),
           ymd: toYMD(item.pubDate),
           pubDate: item.pubDate,
@@ -203,10 +595,10 @@ async function loadNews() {
         });
       });
     });
-
     allNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
   } catch(e) {
-    document.getElementById('news-list').innerHTML = '<div class="empty">뉴스를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해주세요</small></div>';
+    document.getElementById('news-list').innerHTML =
+      '<div class="empty">뉴스를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해주세요</small></div>';
     btn.disabled = false;
     btn.textContent = '새로고침';
     return;
@@ -243,24 +635,32 @@ function renderList() {
   if (to)   list = list.filter(i => i.ymd <= to);
   if (currentQuery) {
     const q = currentQuery.toLowerCase();
-    list = list.filter(i => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
+    list = list.filter(i =>
+      i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
   }
   const q = currentQuery;
   document.getElementById('count-label').textContent =
     (currentTab === '전체' ? '전체' : currentTab) + ' ' + list.length + '건' +
-    (q ? ' — "'+q+'" 검색 결과' : '');
+    (q ? ` — "${q}" 검색 결과` : '');
+
   if (!list.length) {
-    document.getElementById('news-list').innerHTML = '<div class="empty">검색 결과가 없습니다.</div>';
+    document.getElementById('news-list').innerHTML =
+      '<div class="empty">검색 결과가 없습니다.</div>';
     return;
   }
+
   document.getElementById('news-list').innerHTML = list.map(item => `
-    <div class="news-card">
+    <div class="news-card" onclick="window.open('${item.link}','_blank')">
       <div class="card-top">
         <span class="badge badge-${getBadgeClass(item.cat)}">${item.cat}</span>
-        <span class="card-source">${item.isOfficial ? '🏛️ ' : ''}${item.source}</span>
+        <span class="card-source">${item.source}</span>
         <span class="card-date">${item.date}</span>
       </div>
-      <div class="card-title"><a href="${item.link}" target="_blank">${hl(item.title, q)}</a></div>
+      <div class="card-title">
+        <a href="${item.link}" target="_blank" onclick="event.stopPropagation()">
+          ${hl(item.title, q)}
+        </a>
+      </div>
       <div class="card-desc">${hl(item.desc, q)}</div>
     </div>
   `).join('');
