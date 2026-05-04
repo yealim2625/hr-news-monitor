@@ -299,7 +299,14 @@ async function loadNews() {
   document.getElementById('news-list').innerHTML = '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
   document.getElementById('pagination').innerHTML = '';
   try {
-    const queries = ['HR 인사관리','고용노동부 행정해석','노무 판례 근로기준법','임금 성과급 연봉','채용 트렌드','조직문화 직원','유연근무 근로시간','부당해고 징계','직장 노사관계','임직원교육 기업교육','헤드헌팅 경력채용','AI HR HR테크','성과관리 보상체계','연봉인상 임금체계','근로감독 인사노무','모성보호 육아휴직'];
+    const queries = [
+  'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
+  '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
+  '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
+  '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
+  '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
+  '모성보호 제도', '취업규칙 단체협약', '인사평가 KPI',
+  '직무급 임금체계', '근로자성 대법원 판례'];
     const results = await Promise.all(queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json())));
     const seen = new Set();
     allNews = [];
