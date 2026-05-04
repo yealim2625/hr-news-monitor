@@ -258,10 +258,11 @@ function isHRRelated(title, desc) {
 }
 function categorize(title, desc) {
   const text = (title + ' ' + desc).toLowerCase();
+  const cats = [];
   for (const [cat, kws] of Object.entries(KEYWORDS)) {
-    if (kws.some(k => text.includes(k))) return cat;
+    if (kws.some(k => text.includes(k))) cats.push(cat);
   }
-  return 'HR Insight';
+  return cats.length > 0 ? cats : ['HR Insight'];
 }
 function formatDate(p) {
   if (!p) return '';
@@ -317,12 +318,13 @@ async function loadNews() {
         const title = clean(item.title);
         const desc = clean(item.description);
         if (!isHRRelated(title, desc)) return;
-        allNews.push({ title, desc, link: item.link,
-          source: item._source||(item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스'),
-          date: formatDate(item.pubDate), ymd: toYMD(item.pubDate),
-          pubDate: item.pubDate, cat: categorize(title, desc) });
-      });
-    });
+        const cats = categorize(title, desc);
+        cats.forEach(cat => {
+          allNews.push({ title, desc, link: item.link,
+            source: item._source||(item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스'),
+            date: formatDate(item.pubDate), ymd: toYMD(item.pubDate),
+            pubDate: item.pubDate, cat });
+        });
     allNews.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
   } catch(e) {
     document.getElementById('news-list').innerHTML = '<div class="empty">뉴스를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해주세요</small></div>';
@@ -360,7 +362,18 @@ function renderPagination(total) {
 }
 
 function renderList() {
-  let list = currentTab === '전체' ? allNews : allNews.filter(i => i.cat === currentTab);
+  function renderList() {
+  let list;
+  if (currentTab === '전체') {
+    // 전체 탭은 링크 기준으로 중복 제거
+    const seen = new Set();
+    list = allNews.filter(i => {
+      if (seen.has(i.link)) return false;
+      seen.add(i.link); return true;
+    });
+  } else {
+    list = allNews.filter(i => i.cat === currentTab);
+  }
   const from = document.getElementById('date-from').value;
   const to   = document.getElementById('date-to').value;
   if (from) list = list.filter(i => i.ymd >= from);
