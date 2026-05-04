@@ -195,6 +195,7 @@ async function loadNews() {
         allNews.push({
           title, desc, link: item.link,
           source: item._source || (item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스'),
+          isOfficial: !!item._source,
           date: formatDate(item.pubDate),
           ymd: toYMD(item.pubDate),
           pubDate: item.pubDate,
@@ -256,7 +257,7 @@ function renderList() {
     <div class="news-card">
       <div class="card-top">
         <span class="badge badge-${getBadgeClass(item.cat)}">${item.cat}</span>
-        <span class="card-source">${item.source}</span>
+        <span class="card-source">${item.isOfficial ? '🏛️ ' : ''}${item.source}</span>
         <span class="card-date">${item.date}</span>
       </div>
       <div class="card-title"><a href="${item.link}" target="_blank">${hl(item.title, q)}</a></div>
