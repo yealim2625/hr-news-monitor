@@ -11,15 +11,17 @@ const EXCLUDE_KEYWORDS = [
   '선거','후보','정당','국회','의원','대통령','정치','보수','진보',
   '야당','여당','주가','코스피','환율','증권','부동산','아파트','암세포',
   '장학','장학생','중학교','고등학교','초등학교','청소년','입시','수능',
-  '지역인재'
+  '지역인재','드림플러스','인베스터','스마트팜','농업','귀농','투자인재',
+  '지역','읍면동','군청','시청','구청','복지관','봉사'
 ];
 
 const HR_MUST = [
-  'hr','인사','노무','채용','임금','근로','직원','직장','조직',
+  'hr','인사관리','인사팀','노무','채용','임금','근로','직원','직장','조직',
   '고용','역량','성과','연봉','급여','근태','휴가','해고','노사',
-  '취업규칙','판례','행정해석','인사관리','인재관리','헤드헌팅',
-  '임직원','보상체계','근로감독','모성보호','육아휴직','hr테크',
-  'hr data','hr analytics','hr trend','인사조직','사회공헌'
+  '취업규칙','판례','행정해석','인재관리','헤드헌팅',
+  '임직원교육','기업교육','사내교육','직무교육',
+  '보상체계','근로감독','모성보호','육아휴직','hr테크',
+  'hr data','hr analytics','hr trend','인사조직','인사노무'
 ];
 
 const LAW_KEYWORDS = [
@@ -60,7 +62,7 @@ function categorize(title, desc) {
     '노무': ['노무','근로기준법','판례','행정해석','부당해고','노사관계','단체협약','취업규칙','임금체불','해고','근로감독','인사노무'],
     '보상': ['임금','성과급','연봉','급여','보상체계','통상임금','최저임금','연봉인상','임금체계'],
     '채용': ['채용공고','채용절차','공개채용','블라인드채용','면접전형','헤드헌팅','인재영입','채용브랜딩'],
-    '인재육성': ['임직원교육','기업교육','hrd','리더십','역량개발','코칭','멘토링','직무교육','hr세미나'],
+    '인재육성': ['임직원교육','기업교육','사내교육','직무교육','hrd','리더십','역량개발','코칭','멘토링','hr세미나'],
     '조직문화': ['조직문화','번아웃','직원경험','몰입도','워크라이프','기업문화','사회공헌'],
     '근태': ['근태','유연근무','재택근무','연장근로','휴가','근로시간','모성보호','육아휴직'],
   };
@@ -71,7 +73,6 @@ function categorize(title, desc) {
 }
 
 function scoreNews(newsList) {
-  // 중복 보도 감지 — 유사 제목 키워드 추출
   const titleWords = newsList.map(n =>
     n.title.replace(/[^\w가-힣]/g, ' ').split(' ').filter(w => w.length > 1)
   );
@@ -80,13 +81,13 @@ function scoreNews(newsList) {
     let score = 0;
     const titleLower = item.title.toLowerCase();
 
-    // ① 법/판례/정책 키워드 +3점
+    // 법/판례/정책 키워드 +3점
     if (LAW_KEYWORDS.some(k => titleLower.includes(k.toLowerCase()))) score += 3;
 
-    // ② 트렌드 키워드 +2점
+    // 트렌드 키워드 +2점
     if (TREND_KEYWORDS.some(k => titleLower.includes(k.toLowerCase()))) score += 2;
 
-    // ③ 중복 보도 점수 — 다른 기사와 공통 단어 2개 이상이면 +3점
+    // 중복 보도 점수 — 여러 매체가 다룬 주제 +3점
     const myWords = new Set(titleWords[i]);
     let dupCount = 0;
     titleWords.forEach((words, j) => {
@@ -97,7 +98,7 @@ function scoreNews(newsList) {
     if (dupCount >= 2) score += 3;
     else if (dupCount === 1) score += 1;
 
-    // ④ 최신 기사 소폭 우대 +1점 (오늘 날짜)
+    // 오늘 기사 +1점
     const today = new Date().toDateString();
     if (new Date(item.pubDate).toDateString() === today) score += 1;
 
@@ -109,19 +110,20 @@ function pickTop3(news) {
   const scored = scoreNews(news).sort((a, b) => b.score - a.score);
   const selected = [];
   const usedCats = new Set();
+  const usedLinks = new Set();
 
-  // 카테고리 다양성 우선
+  // 카테고리 다양성 우선으로 3개 선정
   for (const item of scored) {
-    if (!usedCats.has(item.cat)) {
+    if (!usedCats.has(item.cat) && !usedLinks.has(item.link)) {
       selected.push(item);
       usedCats.add(item.cat);
+      usedLinks.add(item.link);
     }
     if (selected.length >= 3) break;
   }
 
   // 부족하면 점수 높은 순으로 채우기
   if (selected.length < 3) {
-    const usedLinks = new Set(selected.map(i => i.link));
     for (const item of scored) {
       if (!usedLinks.has(item.link)) {
         selected.push(item);
