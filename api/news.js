@@ -31,7 +31,14 @@ async function fetchRSS(source) {
       const link = linkMatch?.[1]?.trim() || '';
       const descMatch = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) ||
                         block.match(/<description>([\s\S]*?)<\/description>/);
-      const desc = descMatch?.[1]?.trim().replace(/<[^>]+>/g, '').slice(0, 200) || title;
+      const rawDesc = descMatch?.[1]?.trim() || title;
+      const desc = rawDesc
+        .replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, '$1')
+        .replace(/<font[^>]*>([\s\S]*?)<\/font>/gi, '')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .trim()
+        .slice(0, 150) || title;
       const dateMatch = block.match(/<dc:date>([\s\S]*?)<\/dc:date>/) ||
                         block.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
       const pubDate = dateMatch?.[1]?.trim() || new Date().toUTCString();
