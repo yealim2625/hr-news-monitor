@@ -16,13 +16,12 @@ async function fetchRSS(source) {
     const res = await fetch(source.url);
     const text = await res.text();
     const items = [];
-    const itemMatches = text.matchAll(/<item>([\s\S]*?)<\/item>/g);
+    const itemMatches = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)];
     for (const match of itemMatches) {
       const block = match[1];
       const title = (block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
                      block.match(/<title>(.*?)<\/title>/))?.[1]?.trim() || '';
-      const link  = (block.match(/<link>(.*?)<\/link>/) ||
-                     block.match(/<link\/>(.*?)\n/))?.[1]?.trim() || '';
+      const link  = block.match(/<link>([^<]*)<\/link>/)?.[1]?.trim() || '';
       const desc  = (block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) ||
                      block.match(/<description>([\s\S]*?)<\/description>/))?.[1]?.trim() || '';
       const pubDate = block.match(/<pubDate>(.*?)<\/pubDate>/)?.[1]?.trim() || '';
@@ -64,10 +63,9 @@ module.exports = async function handler(req, res) {
     const naverData = await naverRes.json();
     const naverItems = naverData.items || [];
 
-   // 고용노동부 RSS 항상 추가
+    // 고용노동부 RSS 항상 추가
     const rssResults = await Promise.all(RSS_SOURCES.map(fetchRSS));
     const rssItems = rssResults.flat();
-    }
 
     // 합치기
     const allItems = [...naverItems, ...rssItems];
