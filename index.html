@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HR 이슈 모니터</title>
+<title>HR Radar</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: #f5f5f0; color: #1a1a1a; }
   .header { background: #fff; border-bottom: 1px solid #e5e5e0; padding: 1.25rem 1.5rem; }
-  .header h1 { font-size: 18px; font-weight: 600; }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
   .header p { font-size: 13px; color: #888; margin-top: 3px; }
   .container { max-width: 800px; margin: 0 auto; padding: 1.25rem 1rem; }
   .search-wrap { position: relative; margin-bottom: 0.75rem; }
@@ -33,14 +33,14 @@
   .news-card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 14px 16px; }
   .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
   .badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+  .badge-HR-Insight { background: #EEEDFE; color: #3C3489; }
+  .badge-HR-AI { background: #E1F5EE; color: #085041; }
   .badge-노무 { background: #E6F1FB; color: #0C447C; }
-  .badge-인사전략 { background: #EEEDFE; color: #3C3489; }
-  .badge-보상 { background: #EAF3DE; color: #27500A; }
-  .badge-채용 { background: #FAEEDA; color: #633806; }
-  .badge-인재육성 { background: #E1F5EE; color: #085041; }
-  .badge-조직문화 { background: #FBEAF0; color: #72243E; }
-  .badge-근태 { background: #FAECE7; color: #712B13; }
-  .badge-기타 { background: #F1EFE8; color: #444441; }
+  .badge-인재육성 { background: #FAEEDA; color: #633806; }
+  .badge-채용 { background: #FBEAF0; color: #72243E; }
+  .badge-조직문화 { background: #FAECE7; color: #712B13; }
+  .badge-근태 { background: #F1EFE8; color: #444441; }
+  .badge-평가보상 { background: #EAF3DE; color: #27500A; }
   .card-source { font-size: 12px; color: #aaa; }
   .card-date { font-size: 12px; color: #aaa; margin-left: auto; }
   .card-title { font-size: 14px; font-weight: 600; line-height: 1.5; margin-bottom: 4px; }
@@ -56,7 +56,7 @@
 </head>
 <body>
 <div class="header">
-  <h1>HR 이슈 모니터</h1>
+  <h1>📡 HR Radar</h1>
   <p>매일 아침 HR 주요 뉴스 · 판례 · 행정해석을 한눈에</p>
 </div>
 <div class="container">
@@ -73,14 +73,14 @@
   </div>
   <div class="tabs">
     <button class="tab active" onclick="setTab(this,'전체')">전체</button>
-    <button class="tab" onclick="setTab(this,'인사전략')">인사전략</button>
+    <button class="tab" onclick="setTab(this,'HR Insight')">HR Insight</button>
+    <button class="tab" onclick="setTab(this,'HR AI')">HR AI</button>
     <button class="tab" onclick="setTab(this,'노무')">노무</button>
     <button class="tab" onclick="setTab(this,'인재육성')">인재육성</button>
-    <button class="tab" onclick="setTab(this,'보상')">보상</button>
     <button class="tab" onclick="setTab(this,'채용')">채용</button>
     <button class="tab" onclick="setTab(this,'조직문화')">조직문화</button>
     <button class="tab" onclick="setTab(this,'근태')">근태</button>
-    <button class="tab" onclick="setTab(this,'기타')">기타</button>
+    <button class="tab" onclick="setTab(this,'평가·보상')">평가·보상</button>
   </div>
   <div class="meta-row">
     <span class="count" id="count-label">불러오는 중...</span>
@@ -96,28 +96,30 @@ let currentTab = '전체';
 let currentQuery = '';
 
 const KEYWORDS = {
-  '인사전략': ['HR전략','인사전략','HRBP','조직설계','인력계획','HR혁신','성과관리','코칭','인사평가'],
-  '노무': ['노무','근로기준법','판례','행정해석','부당해고','노사관계','단체협약','취업규칙','해고'],
-  '보상': ['임금','성과급','연봉','급여','보상체계','임금체계','통상임금','최저임금'],
-  '채용': ['채용','공채','수시채용','채용절차','헤드헌팅','인재영입','면접','이력서','채용트렌드'],
-  '인재육성': ['교육','육성','HRD','리더십','역량개발','코칭','멘토링','연수','웨비나'],
-  '조직문화': ['조직문화','번아웃','직원경험','몰입도','워크라이프','다양성','기업문화'],
-  '근태': ['근태','유연근무','재택근무','선택근무','연장근로','휴가','근로시간'],
-  '기타': ['HR테크','HRIS','ATS','인사시스템','HR솔루션','HR AI']
+  'HR AI': ['ai hr','hr ai','hr테크','hr tech','hr data','hr analytics','ai 채용','ai 면접','챗gpt','생성ai'],
+  'HR Insight': ['hr전략','인사전략','hrbp','조직설계','인력계획','hr혁신','인사조직개편'],
+  '노무': ['노무','근로기준법','판례','행정해석','부당해고','노사관계','단체협약','취업규칙','임금체불','해고','근로감독','인사노무'],
+  '인재육성': ['임직원교육','기업교육','사내교육','직무교육','hrd','리더십','역량개발','코칭','멘토링','hr세미나'],
+  '채용': ['채용공고','채용절차','공개채용','블라인드채용','면접전형','헤드헌팅','인재영입','채용브랜딩'],
+  '조직문화': ['조직문화','번아웃','직원경험','몰입도','워크라이프','기업문화','사회공헌'],
+  '근태': ['근태','유연근무','재택근무','연장근로','휴가','근로시간','모성보호','육아휴직'],
+  '평가·보상': ['임금','성과급','연봉','급여','보상체계','통상임금','최저임금','연봉인상','임금체계','성과관리','평가제도','인사평가','kpi','okr'],
 };
 
 const EXCLUDE_KEYWORDS = [
   '선거','후보','정당','국회','의원','대통령','정치','보수','진보',
-  '야당','여당','지지율','출마','당선','낙선','투표','개헌',
-  '암세포','DNA','의학','병원','진단','수술','치료','임상',
-  '주가','코스피','환율','증권','펀드','ETF','채권','부동산',
-  '아파트','분양','재건축','청약'
+  '야당','여당','주가','코스피','환율','증권','부동산','아파트','암세포',
+  '장학','장학생','중학교','고등학교','초등학교','청소년','입시','수능',
+  '지역인재','드림플러스','인베스터','스마트팜','농업','귀농','봉사'
 ];
 
 const HR_MUST = [
-  'hr','인사','노무','채용','임금','근로','직원','직장','조직',
-  '고용','교육','육성','역량','성과','연봉','급여','근태',
-  '휴가','해고','노사','취업규칙','단체협약','판례','행정해석'
+  'hr','인사관리','인사팀','노무','채용','임금','근로','직원','직장','조직',
+  '고용','역량','성과','연봉','급여','근태','휴가','해고','노사',
+  '취업규칙','판례','행정해석','인재관리','헤드헌팅',
+  '임직원교육','기업교육','사내교육','직무교육',
+  '보상체계','근로감독','모성보호','육아휴직','hr테크',
+  'hr data','hr analytics','hr trend','인사조직','인사노무'
 ];
 
 function isHRRelated(title, desc) {
@@ -131,7 +133,7 @@ function categorize(title, desc) {
   for (const [cat, keywords] of Object.entries(KEYWORDS)) {
     if (keywords.some(k => text.includes(k.toLowerCase()))) return cat;
   }
-  return '기타';
+  return 'HR Insight';
 }
 
 function formatDate(pubDate) {
@@ -152,6 +154,15 @@ function resetDate() {
   renderList();
 }
 
+function getBadgeClass(cat) {
+  const map = {
+    'HR Insight': 'HR-Insight', 'HR AI': 'HR-AI',
+    '노무': '노무', '인재육성': '인재육성', '채용': '채용',
+    '조직문화': '조직문화', '근태': '근태', '평가·보상': '평가보상',
+  };
+  return map[cat] || 'HR-Insight';
+}
+
 async function loadNews() {
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
@@ -162,7 +173,10 @@ async function loadNews() {
     const queries = [
       'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
       '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
-      '유연근무 근로시간', '부당해고 징계', '직장 노사관계', '인재육성 교육'
+      '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
+      '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
+      '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
+      '모성보호 육아휴직'
     ];
     const results = await Promise.all(
       queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
@@ -175,12 +189,11 @@ async function loadNews() {
       items.forEach(item => {
         if (seen.has(item.link)) return;
         seen.add(item.link);
-        const title = item.title.replace(/<[^>]+>/g, '');
-        const desc = item.description.replace(/<[^>]+>/g, '');
+        const title = item.title.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'");
+        const desc = item.description.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'");
         if (!isHRRelated(title, desc)) return;
         allNews.push({
-          title, desc,
-          link: item.link,
+          title, desc, link: item.link,
           source: item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스',
           date: formatDate(item.pubDate),
           ymd: toYMD(item.pubDate),
@@ -223,31 +236,26 @@ function hl(text, q) {
 
 function renderList() {
   let list = currentTab === '전체' ? allNews : allNews.filter(i => i.cat === currentTab);
-
   const from = document.getElementById('date-from').value;
   const to = document.getElementById('date-to').value;
   if (from) list = list.filter(i => i.ymd >= from);
   if (to)   list = list.filter(i => i.ymd <= to);
-
   if (currentQuery) {
     const q = currentQuery.toLowerCase();
     list = list.filter(i => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q));
   }
-
   const q = currentQuery;
   document.getElementById('count-label').textContent =
     (currentTab === '전체' ? '전체' : currentTab) + ' ' + list.length + '건' +
     (q ? ' — "'+q+'" 검색 결과' : '');
-
   if (!list.length) {
     document.getElementById('news-list').innerHTML = '<div class="empty">검색 결과가 없습니다.</div>';
     return;
   }
-
   document.getElementById('news-list').innerHTML = list.map(item => `
     <div class="news-card">
       <div class="card-top">
-        <span class="badge badge-${item.cat}">${item.cat}</span>
+        <span class="badge badge-${getBadgeClass(item.cat)}">${item.cat}</span>
         <span class="card-source">${item.source}</span>
         <span class="card-date">${item.date}</span>
       </div>
