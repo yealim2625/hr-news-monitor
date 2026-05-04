@@ -154,8 +154,8 @@ async function fetchNews() {
     (data.items || []).forEach(item => {
       if (seen.has(item.link)) return;
       seen.add(item.link);
-      const title = item.title.replace(/<[^>]+>/g, '');
-      const desc = item.description.replace(/<[^>]+>/g, '');
+      const title = item.title.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'");
+      const desc = item.description.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'");
       if (!isHRRelated(title, desc)) return;
       news.push({
         title, desc, link: item.link, pubDate: item.pubDate,
