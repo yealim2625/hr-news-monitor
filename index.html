@@ -194,7 +194,7 @@ async function loadNews() {
         if (!isHRRelated(title, desc)) return;
         allNews.push({
           title, desc, link: item.link,
-          source: item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스',
+          source: item._source || (item.originallink ? new URL(item.originallink).hostname.replace('www.','') : '뉴스'),
           date: formatDate(item.pubDate),
           ymd: toYMD(item.pubDate),
           pubDate: item.pubDate,
