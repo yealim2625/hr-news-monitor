@@ -101,7 +101,12 @@
   .badge-근태       { background: var(--badge-근태-bg);        color: var(--badge-근태-text); }
   .badge-평가보상   { background: var(--badge-평가보상-bg);    color: var(--badge-평가보상-text); }
   .card-source { font-size: 12px; color: var(--text-tertiary); }
-  .card-date { font-size: 11px; color: var(--text-tertiary); margin-left: auto; background: var(--tab-bg); padding: 2px 8px; border-radius: 99px; }
+  .card-date { font-size: 11px; color: var(--text-tertiary); background: var(--tab-bg); padding: 2px 8px; border-radius: 99px; }
+  .bookmark-btn { background: none; border: none; cursor: pointer; font-size: 15px; padding: 2px 5px; border-radius: 6px; color: var(--text-tertiary); transition: all var(--transition); margin-left: auto; flex-shrink: 0; line-height: 1; }
+  .bookmark-btn:hover { color: var(--primary); background: rgba(91,79,207,0.1); }
+  .bookmark-btn.bookmarked { color: #f0a500; }
+  .news-card.bookmarked-card { border-color: rgba(240,165,0,0.35); }
+  .news-card.bookmarked-card::before { background: #f0a500; }
   .card-title { font-size: 14px; font-weight: 600; line-height: 1.55; margin-bottom: 5px; color: var(--text-primary); }
   .card-title a { color: inherit; text-decoration: none; transition: color var(--transition); }
   .card-title a:hover { color: var(--primary); }
@@ -164,6 +169,7 @@
     <button class="tab" onclick="setTab(this,'조직문화')">조직문화</button>
     <button class="tab" onclick="setTab(this,'근태')">근태</button>
     <button class="tab" onclick="setTab(this,'평가·보상')">평가·보상</button>
+    <button class="tab" id="tab-bookmark" onclick="setTab(this,'북마크')" style="margin-left:auto;">★ 북마크</button>
   </div>
   <div class="meta-row">
     <span class="count" id="count-label">불러오는 중...</span>
@@ -218,6 +224,36 @@ function toggleDark() {
     document.querySelector('.dark-toggle').textContent = '☀️';
   }
 })();
+
+// ── 북마크 ──────────────────────────────────────────
+const BM_KEY = 'hr-radar-bookmarks';
+function loadBookmarks() {
+  try { return JSON.parse(localStorage.getItem(BM_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveBookmarks(bms) {
+  try { localStorage.setItem(BM_KEY, JSON.stringify(bms)); } catch(e) {}
+}
+function isBookmarked(link) { return loadBookmarks().some(b => b.link === link); }
+function toggleBookmark(encodedLink) {
+  const link = decodeURIComponent(encodedLink);
+  let bms = loadBookmarks();
+  const idx = bms.findIndex(b => b.link === link);
+  if (idx >= 0) {
+    bms.splice(idx, 1);
+  } else {
+    const item = allNews.find(n => n.link === link) || bms.find(b => b.link === link);
+    if (item) bms.unshift(item);
+  }
+  saveBookmarks(bms);
+  updateBookmarkTab();
+  renderList();
+}
+function updateBookmarkTab() {
+  const count = loadBookmarks().length;
+  const el = document.getElementById('tab-bookmark');
+  if (el) el.textContent = count > 0 ? `★ 북마크 ${count}` : '★ 북마크';
+}
+// ────────────────────────────────────────────────────
 
 const KEYWORDS = {
   'HR AI':    ['ai hr','hr ai','hr테크','hr tech','hr data','hr analytics','ai 채용','ai 면접','챗gpt','생성ai'],
@@ -373,19 +409,23 @@ function renderPagination(total) {
 }
 
 function renderList() {
+  const bookmarkLinks = new Set(loadBookmarks().map(b => b.link));
+
   let list;
-  if (currentTab === '전체') {
-    // 전체: 기사 그대로, 중복 없음 (이미 seen으로 처리)
+  if (currentTab === '북마크') {
+    list = loadBookmarks();
+  } else if (currentTab === '전체') {
     list = allNews;
   } else {
-    // 카테고리 탭: cats 배열에 해당 카테고리 포함된 기사만
     list = allNews.filter(i => i.cats.includes(currentTab));
   }
 
-  const from = document.getElementById('date-from').value;
-  const to   = document.getElementById('date-to').value;
-  if (from) list = list.filter(i => i.ymd >= from);
-  if (to)   list = list.filter(i => i.ymd <= to);
+  if (currentTab !== '북마크') {
+    const from = document.getElementById('date-from').value;
+    const to   = document.getElementById('date-to').value;
+    if (from) list = list.filter(i => i.ymd >= from);
+    if (to)   list = list.filter(i => i.ymd <= to);
+  }
 
   if (currentQuery) {
     const q = currentQuery.toLowerCase();
@@ -404,26 +444,35 @@ function renderList() {
     (totalPages > 1 ? `  (${currentPage}/${totalPages} 페이지)` : '');
 
   if (!pageItems.length) {
-    document.getElementById('news-list').innerHTML = '<div class="empty">검색 결과가 없습니다.</div>';
+    const msg = currentTab === '북마크' ? '북마크한 기사가 없습니다.<br><small>기사 카드의 ★ 버튼으로 추가해보세요</small>' : '검색 결과가 없습니다.';
+    document.getElementById('news-list').innerHTML = `<div class="empty">${msg}</div>`;
     document.getElementById('pagination').innerHTML = ''; return;
   }
 
-  document.getElementById('news-list').innerHTML = pageItems.map(item => `
-    <div class="news-card" onclick="window.open('${item.link}','_blank')">
+  document.getElementById('news-list').innerHTML = pageItems.map(item => {
+    const bmed = bookmarkLinks.has(item.link);
+    const encodedLink = encodeURIComponent(item.link);
+    return `
+    <div class="news-card ${bmed ? 'bookmarked-card' : ''}" onclick="window.open('${item.link}','_blank')">
       <div class="card-top">
         ${item.cats.map(c => `<span class="badge badge-${getBadgeClass(c)}">${c}</span>`).join('')}
         <span class="card-source">${item.source}</span>
         <span class="card-date">${item.date}</span>
+        <button class="bookmark-btn ${bmed ? 'bookmarked' : ''}"
+          onclick="event.stopPropagation(); toggleBookmark('${encodedLink}')"
+          title="${bmed ? '북마크 해제' : '북마크 추가'}">${bmed ? '★' : '☆'}</button>
       </div>
       <div class="card-title">
         <a href="${item.link}" target="_blank" onclick="event.stopPropagation()">${hl(item.title,q)}</a>
       </div>
       <div class="card-desc">${hl(item.desc,q)}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   renderPagination(total);
 }
 
+updateBookmarkTab();
 loadNews();
 </script>
 </body>
