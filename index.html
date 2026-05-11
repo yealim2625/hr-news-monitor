@@ -294,121 +294,53 @@ function onPerPageChange() {
   renderList();
 }
 
-const CACHE_KEY = 'hr-radar-news';
-
-function saveCache(news) {
-  try {
-    // 최신순 정렬 후 최대 1000개 보관
-    const trimmed = news.slice(0, 1000);
-    localStorage.setItem(CACHE_KEY, JSON.stringify(trimmed));
-  } catch(e) {}
-}
-
-function loadCache() {
-  try {
-    const news = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-    if (news && news.length > 0) return news;
-  } catch(e) {}
-  return null;
-}
-
-// 새 기사를 기존 캐시에 누적 (중복 제거, 최신순, 최대 1000개)
-function mergeNews(fresh, existing) {
-  const existingLinks = new Set(existing.map(n => n.link));
-  const newOnly = fresh.filter(n => !existingLinks.has(n.link));
-  return [...newOnly, ...existing]
-    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
-    .slice(0, 1000);
-}
-
-const NEWS_QUERIES = [
-  'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
-  '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
-  '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
-  '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
-  '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
-  '모성보호 제도', '취업규칙 단체협약', '인사평가 KPI',
-  '직무급 임금체계', '근로자성 대법원 판례', '연봉 인상', '성과급',
-  '근로기준법 개정안', '근로기준법 개정', '노동법 개정'
-];
-
-function parseItems(results) {
-  const seen = new Set();
-  const news = [];
-  results.forEach(data => {
-    (data.items || []).forEach(item => {
-      if (seen.has(item.link)) return;
-      seen.add(item.link);
-      const title = clean(item.title);
-      const desc = clean(item.description);
-      if (!isHRRelated(title, desc)) return;
-      const cats = getCats(title, desc);
-      const source = item._source || (item.originallink
-        ? new URL(item.originallink).hostname.replace('www.', '') : '뉴스');
-      news.push({
-        title, desc, link: item.link, source,
-        date: formatDate(item.pubDate),
-        ymd: toYMD(item.pubDate),
-        pubDate: item.pubDate,
-        cats
-      });
-    });
-  });
-  return news.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-}
-
 async function loadNews(forceRefresh = false) {
   const btn = document.getElementById('refresh-btn');
+  btn.disabled = true;
 
-  // 캐시 먼저 표시 (강제 새로고침 아닐 때)
   if (!forceRefresh) {
-    const cached = loadCache();
-    if (cached) {
-      allNews = cached;
-      btn.disabled = false;
-      btn.textContent = '새로고침';
-      currentPage = 1;
-      renderList();
-      // 백그라운드에서 새 기사 누적
-      fetchAndUpdate();
-      return;
-    }
+    // 서버 KV에서 누적된 기사 바로 표시
+    btn.textContent = '불러오는 중...';
+    try {
+      const res = await fetch('/api/articles');
+      const { articles } = await res.json();
+      if (articles && articles.length > 0) {
+        allNews = articles;
+        currentPage = 1;
+        renderList();
+        btn.disabled = false;
+        btn.textContent = '새로고침';
+        // 백그라운드에서 최신 기사 수집·누적
+        fetchAndUpdate();
+        return;
+      }
+    } catch(e) {}
   }
 
-  btn.disabled = true; btn.textContent = '불러오는 중...';
+  // 첫 방문이거나 강제 새로고침
+  btn.textContent = '수집 중...';
   document.getElementById('news-list').innerHTML =
-    '<div class="loading"><div class="spinner"></div><br>뉴스를 불러오는 중...</div>';
+    '<div class="loading"><div class="spinner"></div><br>뉴스를 수집하는 중...</div>';
   document.getElementById('pagination').innerHTML = '';
 
-  try {
-    const results = await Promise.all(
-      NEWS_QUERIES.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
-    );
-    const fresh = parseItems(results);
-    // 기존 캐시와 누적 (강제 새로고침이라도 과거 기사는 유지)
-    const cached = loadCache() || [];
-    allNews = mergeNews(fresh, cached);
-  } catch(e) {
-    document.getElementById('news-list').innerHTML =
-      '<div class="empty">뉴스를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해주세요</small></div>';
-    btn.disabled = false; btn.textContent = '새로고침'; return;
-  }
+  await fetchAndUpdate();
 
-  saveCache(allNews);
-  btn.disabled = false; btn.textContent = '새로고침';
-  currentPage = 1; renderList();
+  btn.disabled = false;
+  btn.textContent = '새로고침';
 }
 
 async function fetchAndUpdate() {
   try {
-    const results = await Promise.all(
-      NEWS_QUERIES.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
-    );
-    const fresh = parseItems(results);
-    // 기존 기사에 새 기사 누적 (덮어쓰지 않음)
-    allNews = mergeNews(fresh, allNews);
-    saveCache(allNews);
-    renderList();
+    // 서버에 수집 요청 (Naver API + RSS → KV 저장)
+    await fetch('/api/collect', { method: 'GET' });
+    // 저장된 전체 기사 가져오기
+    const res = await fetch('/api/articles');
+    const { articles } = await res.json();
+    if (articles && articles.length > 0) {
+      allNews = articles;
+      currentPage = 1;
+      renderList();
+    }
   } catch(e) {}
 }
 

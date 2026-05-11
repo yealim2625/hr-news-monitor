@@ -3,9 +3,7 @@
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
   "crons": [
-    {
-      "path": "/api/slack-briefing",
-      "schedule": "30 23 * * *"
-    }
+    { "path": "/api/collect",        "schedule": "0 22 * * *" },
+    { "path": "/api/slack-briefing", "schedule": "30 23 * * *" }
   ]
 }
