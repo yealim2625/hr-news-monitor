@@ -23,6 +23,14 @@ const HR_MUST = [
   'hr data','hr analytics','hr trend','인사조직','인사노무'
 ];
 
+// 긴급 법령 변경: 가장 높은 우선순위 (+6점)
+const URGENT_LAW_KEYWORDS = [
+  '개정안 통과','개정안 의결','본회의 통과','국회 통과',
+  '공포','시행일','개정안 가결','법 시행','법률 개정','노동법 개정',
+  '근로기준법 개정','최저임금 결정','최저임금 고시'
+];
+
+// 일반 법률/정책 키워드 (+3점)
 const LAW_KEYWORDS = [
   '판례','개정','시행','위반','행정해석','고시','지침','가이드라인',
   '과태료','처벌','금지','의무','법원','대법원','고등법원','근로기준법'
@@ -85,10 +93,14 @@ function scoreNews(newsList) {
     let score = 0;
     const titleLower = item.title.toLowerCase();
 
+    // 긴급 법령 변경 (개정안 통과·공포·시행일 등) +6점 — 최우선
+    const fullTextLower = (item.title + ' ' + item.desc).toLowerCase();
+    if (URGENT_LAW_KEYWORDS.some(k => fullTextLower.includes(k))) score += 6;
+
     // HR AI 키워드 +4점
     if (AI_KEYWORDS.some(k => titleLower.includes(k))) score += 4;
 
-    // 법/판례/정책 키워드 +3점
+    // 일반 법/판례/정책 키워드 +3점
     if (LAW_KEYWORDS.some(k => titleLower.includes(k.toLowerCase()))) score += 3;
 
     // 트렌드 키워드 +2점
