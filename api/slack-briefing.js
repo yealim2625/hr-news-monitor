@@ -4,7 +4,8 @@ const HR_QUERIES = [
   '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
   '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
   '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
-  '모성보호 제도','근로기준법','근로기준법 개정안','노동법 상임위'
+  '모성보호 제도','근로기준법','근로기준법 개정안','노동법 상임위',
+  'AI 채용 인사', '생성AI 직장', '인공지능 인사관리', 'HR 디지털전환'
 ];
 
 const EXCLUDE_KEYWORDS = [
@@ -43,7 +44,9 @@ const TREND_KEYWORDS = [
 
 const AI_KEYWORDS = [
   'ai hr','hr ai','hr테크','hr tech','hr data','hr analytics',
-  'ai 채용','ai 면접','챗gpt','생성ai'
+  'ai 채용','ai 면접','챗gpt','생성ai',
+  'ai 인사','인공지능 채용','인공지능 인사','ai 역량','ai 성과',
+  'hrtech','hr 디지털','디지털 hr','생성형 ai'
 ];
 
 function isHRRelated(title, desc) {
