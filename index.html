@@ -231,7 +231,7 @@ const KEYWORDS = {
 };
 
 const EXCLUDE_KEYWORDS = [
-  '선거','후보','정당','국회','의원','대통령','정치','보수','진보',
+  '선거','후보','정당','대통령','정치','보수','진보',
   '야당','여당','주가','코스피','환율','증권','부동산','아파트','암세포',
   '장학','장학생','중학교','고등학교','초등학교','청소년','입시','수능',
   '지역인재','드림플러스','인베스터','스마트팜','농업','귀농','봉사'
@@ -295,29 +295,72 @@ function onPerPageChange() {
 }
 
 const CACHE_KEY = 'hr-radar-news';
-const CACHE_TIME_KEY = 'hr-radar-news-time';
-const CACHE_DURATION = 1000 * 60 * 60 * 3; // 3시간
 
 function saveCache(news) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(news));
-    localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+    // 최신순 정렬 후 최대 1000개 보관
+    const trimmed = news.slice(0, 1000);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(trimmed));
   } catch(e) {}
 }
 
 function loadCache() {
   try {
-    const time = parseInt(localStorage.getItem(CACHE_TIME_KEY) || '0');
     const news = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-    if (news && Date.now() - time < CACHE_DURATION) return news;
+    if (news && news.length > 0) return news;
   } catch(e) {}
   return null;
+}
+
+// 새 기사를 기존 캐시에 누적 (중복 제거, 최신순, 최대 1000개)
+function mergeNews(fresh, existing) {
+  const existingLinks = new Set(existing.map(n => n.link));
+  const newOnly = fresh.filter(n => !existingLinks.has(n.link));
+  return [...newOnly, ...existing]
+    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+    .slice(0, 1000);
+}
+
+const NEWS_QUERIES = [
+  'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
+  '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
+  '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
+  '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
+  '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
+  '모성보호 제도', '취업규칙 단체협약', '인사평가 KPI',
+  '직무급 임금체계', '근로자성 대법원 판례', '연봉 인상', '성과급',
+  '근로기준법 개정안', '근로기준법 개정', '노동법 개정'
+];
+
+function parseItems(results) {
+  const seen = new Set();
+  const news = [];
+  results.forEach(data => {
+    (data.items || []).forEach(item => {
+      if (seen.has(item.link)) return;
+      seen.add(item.link);
+      const title = clean(item.title);
+      const desc = clean(item.description);
+      if (!isHRRelated(title, desc)) return;
+      const cats = getCats(title, desc);
+      const source = item._source || (item.originallink
+        ? new URL(item.originallink).hostname.replace('www.', '') : '뉴스');
+      news.push({
+        title, desc, link: item.link, source,
+        date: formatDate(item.pubDate),
+        ymd: toYMD(item.pubDate),
+        pubDate: item.pubDate,
+        cats
+      });
+    });
+  });
+  return news.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 }
 
 async function loadNews(forceRefresh = false) {
   const btn = document.getElementById('refresh-btn');
 
-  // 캐시 확인 (강제 새로고침 아닐 때)
+  // 캐시 먼저 표시 (강제 새로고침 아닐 때)
   if (!forceRefresh) {
     const cached = loadCache();
     if (cached) {
@@ -326,8 +369,7 @@ async function loadNews(forceRefresh = false) {
       btn.textContent = '새로고침';
       currentPage = 1;
       renderList();
-
-      // 백그라운드에서 조용히 새 기사 업데이트
+      // 백그라운드에서 새 기사 누적
       fetchAndUpdate();
       return;
     }
@@ -339,92 +381,34 @@ async function loadNews(forceRefresh = false) {
   document.getElementById('pagination').innerHTML = '';
 
   try {
-    const queries = [
-      'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
-      '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
-      '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
-      '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
-      '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
-      '모성보호 제도', '취업규칙 단체협약', '인사평가 KPI',
-      '직무급 임금체계', '근로자성 대법원 판례', '연봉 인상', '성과급'
-    ];
-
     const results = await Promise.all(
-      queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
+      NEWS_QUERIES.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
     );
-
-    const seen = new Set();
-    allNews = [];
-
-    results.forEach(data => {
-      (data.items || []).forEach(item => {
-        if (seen.has(item.link)) return;
-        seen.add(item.link);
-        const title = clean(item.title);
-        const desc = clean(item.description);
-        if (!isHRRelated(title, desc)) return;
-        const cats = getCats(title, desc);
-        const source = item._source || (item.originallink
-          ? new URL(item.originallink).hostname.replace('www.', '')
-          : '뉴스');
-        // 기사 하나당 객체 하나, cats 배열로 복수 카테고리 저장
-        allNews.push({
-          title, desc, link: item.link, source,
-          date: formatDate(item.pubDate),
-          ymd: toYMD(item.pubDate),
-          pubDate: item.pubDate,
-          cats  // 복수 카테고리 배열
-        });
-      });
-    });
-
-    allNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-
+    const fresh = parseItems(results);
+    // 기존 캐시와 누적 (강제 새로고침이라도 과거 기사는 유지)
+    const cached = loadCache() || [];
+    allNews = mergeNews(fresh, cached);
   } catch(e) {
     document.getElementById('news-list').innerHTML =
       '<div class="empty">뉴스를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해주세요</small></div>';
     btn.disabled = false; btn.textContent = '새로고침'; return;
   }
 
- saveCache(allNews);
+  saveCache(allNews);
   btn.disabled = false; btn.textContent = '새로고침';
   currentPage = 1; renderList();
 }
 
 async function fetchAndUpdate() {
   try {
-    const queries = [
-      'HR 인사관리', '고용노동부 행정해석', '노무 판례 근로기준법',
-      '임금 성과급 연봉', '채용 트렌드', '조직문화 직원',
-      '유연근무 근로시간', '부당해고 징계', '직장 노사관계',
-      '임직원교육 기업교육', '헤드헌팅 경력채용', 'AI HR HR테크',
-      '성과관리 보상체계', '연봉인상 임금체계', '근로감독 인사노무',
-      '모성보호 육아휴직', '취업규칙 단체협약', '인사평가 KPI',
-      '직무급 임금체계', '근로자성 대법원 판례'
-    ];
     const results = await Promise.all(
-      queries.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
+      NEWS_QUERIES.map(q => fetch(`/api/news?query=${encodeURIComponent(q)}`).then(r => r.json()))
     );
-    const seen = new Set();
-    const newNews = [];
-    results.forEach(data => {
-      (data.items || []).forEach(item => {
-        if (seen.has(item.link)) return;
-        seen.add(item.link);
-        const title = clean(item.title);
-        const desc = clean(item.description);
-        if (!isHRRelated(title, desc)) return;
-        const cats = getCats(title, desc);
-        const source = item._source || (item.originallink
-          ? new URL(item.originallink).hostname.replace('www.', '') : '뉴스');
-        newNews.push({ title, desc, link: item.link, source,
-          date: formatDate(item.pubDate), ymd: toYMD(item.pubDate),
-          pubDate: item.pubDate, cats });
-      });
-    });
-    newNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-    allNews = newNews;
+    const fresh = parseItems(results);
+    // 기존 기사에 새 기사 누적 (덮어쓰지 않음)
+    allNews = mergeNews(fresh, allNews);
     saveCache(allNews);
+    renderList();
   } catch(e) {}
 }
 

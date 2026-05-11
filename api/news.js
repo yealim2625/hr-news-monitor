@@ -1,5 +1,6 @@
 const RSS_SOURCES = [
   { url: 'https://www.moel.go.kr/rss/lawinfo.do', source: '고용노동부(입법예고)', cat: '노무' },
+  { url: 'https://www.moel.go.kr/rss/news.do', source: '고용노동부(보도자료)', cat: '노무' },
 ];
 
 async function fetchRSS(source) {

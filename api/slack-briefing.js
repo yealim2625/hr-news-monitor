@@ -8,7 +8,7 @@ const HR_QUERIES = [
 ];
 
 const EXCLUDE_KEYWORDS = [
-  '선거','후보','정당','국회','의원','대통령','정치','보수','진보',
+  '선거','후보','정당','대통령','정치','보수','진보',
   '야당','여당','주가','코스피','환율','증권','부동산','아파트','암세포',
   '장학','장학생','중학교','고등학교','초등학교','청소년','입시','수능',
   '지역인재','드림플러스','인베스터','스마트팜','농업','귀농','봉사'
@@ -105,9 +105,11 @@ function scoreNews(newsList) {
     if (dupCount >= 2) score += 3;
     else if (dupCount === 1) score += 1;
 
-    // 오늘 기사 +1점
-    const today = new Date().toDateString();
-    if (new Date(item.pubDate).toDateString() === today) score += 1;
+    // 오늘 기사 +1점 (KST 기준)
+    const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const todayKST = kstNow.toISOString().slice(0, 10);
+    const itemDate = new Date(new Date(item.pubDate).getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    if (itemDate === todayKST) score += 1;
 
     return { ...item, score };
   });
@@ -192,8 +194,10 @@ async function sendSlack(message) {
 module.exports = async function handler(req, res) {
   try {
     const news = await fetchNews();
-    const today = new Date().toLocaleDateString('ko-KR', {
-      year:'numeric', month:'long', day:'numeric', weekday:'short'
+    const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const today = kstNow.toLocaleDateString('ko-KR', {
+      year:'numeric', month:'long', day:'numeric', weekday:'short',
+      timeZone: 'Asia/Seoul'
     });
     const top3 = pickTop3(news);
 
