@@ -1,73 +1,32 @@
-const HR_QUERIES = [
-  'HR 인사관리', '고용노동부 행정해석', '인사 트렌드',
-  '노무 판례 근로기준법', '부당해고 징계', '직장 노사관계',
-  '근로감독 인사노무', '취업규칙 단체협약', '근로자성 대법원 판례',
-  '근로기준법 개정안', '근로기준법 개정', '노동법 개정',
-  '중대재해처벌법 안전보건', '산업재해 근로자', '임금체불 체불임금',
-  '임금 성과급 연봉', '성과관리 보상체계', '연봉인상 임금체계',
-  '인사평가 KPI', '직무급 임금체계', '최저임금',
-  '채용 트렌드', '헤드헌팅 경력채용', '수시채용 공채',
-  '임직원교육 기업교육', '리스킬링 업스킬링', 'HRD 역량개발',
-  '조직문화 직원', '직원경험 웰빙 몰입', '다양성 포용 직장문화',
-  '유연근무 근로시간', '모성보호 제도', '주4일제 근무시간', '탄력근로제 52시간',
-  'AI HR HR테크', 'AI 채용 인사', '생성AI 직장', '인공지능 인사관리', 'HR 디지털전환'
-];
+// collect.js가 매일 07:00 KST에 KV에 저장해 둔 기사를 읽어서 TOP3 전송
+// → Naver API 직접 호출 없음, 실행 1초 이내, 타임아웃 없음
 
-const EXCLUDE_KEYWORDS = [
-  '선거','후보','정당','대통령','정치','보수','진보',
-  '야당','여당','주가','코스피','환율','증권','부동산','아파트','암세포',
-  '장학','장학생','중학교','고등학교','초등학교','청소년','입시','수능',
-  '지역인재','드림플러스','인베스터','스마트팜','농업','귀농','봉사'
-];
-
-const HR_MUST = [
-  'hr','인사관리','인사팀','노무','채용','임금','근로','직원','직장','조직',
-  '고용','역량','성과','연봉','급여','근태','휴가','해고','노사',
-  '취업규칙','판례','행정해석','인재관리','헤드헌팅',
-  '임직원교육','기업교육','사내교육','직무교육',
-  '보상체계','근로감독','모성보호','육아휴직','hr테크',
-  'hr data','hr analytics','hr trend','인사조직','인사노무',
-  '산재','중대재해','안전보건','직업병','임금체불',
-  '리스킬','업스킬','온보딩','채용브랜딩',
-  '웰빙','번아웃','몰입도','다양성','포용','심리적 안전'
-];
-
-// 긴급 법령 변경: 가장 높은 우선순위 (+6점)
+// 긴급 법령 변경 (+6점)
 const URGENT_LAW_KEYWORDS = [
   '개정안 통과','개정안 의결','본회의 통과','국회 통과',
   '공포','시행일','개정안 가결','법 시행','법률 개정','노동법 개정',
   '근로기준법 개정','최저임금 결정','최저임금 고시'
 ];
 
-// 일반 법률/정책 키워드 (+3점)
+// 일반 법/판례/정책 (+3점)
 const LAW_KEYWORDS = [
   '판례','개정','시행','위반','행정해석','고시','지침','가이드라인',
   '과태료','처벌','금지','의무','법원','대법원','고등법원','근로기준법'
 ];
 
+// 트렌드 (+2점)
 const TREND_KEYWORDS = [
   '트렌드','확산','증가','급증','변화','전망','조사','설문',
   '리포트','보고서','통계','역대','최고','최저','처음'
 ];
 
+// HR AI (+4점)
 const AI_KEYWORDS = [
   'ai hr','hr ai','hr테크','hr tech','hr data','hr analytics',
   'ai 채용','ai 면접','챗gpt','생성ai',
   'ai 인사','인공지능 채용','인공지능 인사','ai 역량','ai 성과',
   'hrtech','hr 디지털','디지털 hr','생성형 ai'
 ];
-
-function isHRRelated(title, desc) {
-  const text = (title + ' ' + desc).toLowerCase();
-  if (EXCLUDE_KEYWORDS.some(k => text.includes(k.toLowerCase()))) return false;
-  return HR_MUST.some(k => text.includes(k.toLowerCase()));
-}
-
-function formatDate(pubDate) {
-  if (!pubDate) return '';
-  const d = new Date(pubDate);
-  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
-}
 
 function getCategoryEmoji(cat) {
   const map = {
@@ -78,23 +37,6 @@ function getCategoryEmoji(cat) {
   return map[cat] || '💡';
 }
 
-function categorize(title, desc) {
-  const text = (title + ' ' + desc).toLowerCase();
-  const KEYWORDS = {
-    'HR AI': ['ai hr','hr ai','hr테크','hr tech','hr data','hr analytics','ai 채용','ai 면접','챗gpt','생성ai'],
-    '노무': ['노무','근로기준법','판례','행정해석','부당해고','노사관계','단체협약','취업규칙','임금체불','해고','근로감독','인사노무'],
-    '인재육성': ['임직원교육','기업교육','사내교육','직무교육','hrd','리더십','역량개발','코칭','멘토링','hr세미나'],
-    '채용': ['채용공고','채용절차','공개채용','블라인드채용','면접전형','헤드헌팅','인재영입','채용브랜딩'],
-    '조직문화': ['조직문화','번아웃','직원경험','몰입도','워크라이프','기업문화','사회공헌'],
-    '근태': ['근태','유연근무','재택근무','연장근로','휴가','근로시간','모성보호','육아휴직'],
-    '평가·보상': ['임금','성과급','연봉','급여','보상체계','통상임금','최저임금','연봉인상','임금체계','성과관리','평가제도','인사평가','kpi','okr'],
-  };
-  for (const [cat, keywords] of Object.entries(KEYWORDS)) {
-    if (keywords.some(k => text.includes(k))) return cat;
-  }
-  return 'HR Insight';
-}
-
 function scoreNews(newsList) {
   const titleWords = newsList.map(n =>
     n.title.replace(/[^\w가-힣]/g, ' ').split(' ').filter(w => w.length > 1)
@@ -103,36 +45,31 @@ function scoreNews(newsList) {
   return newsList.map((item, i) => {
     let score = 0;
     const titleLower = item.title.toLowerCase();
+    const fullLower = (item.title + ' ' + (item.desc || '')).toLowerCase();
 
-    // 긴급 법령 변경 (개정안 통과·공포·시행일 등) +6점 — 최우선
-    const fullTextLower = (item.title + ' ' + item.desc).toLowerCase();
-    if (URGENT_LAW_KEYWORDS.some(k => fullTextLower.includes(k))) score += 6;
-
-    // HR AI 키워드 +4점
+    // 긴급 법령 변경 +6점
+    if (URGENT_LAW_KEYWORDS.some(k => fullLower.includes(k))) score += 6;
+    // HR AI +4점
     if (AI_KEYWORDS.some(k => titleLower.includes(k))) score += 4;
-
-    // 일반 법/판례/정책 키워드 +3점
-    if (LAW_KEYWORDS.some(k => titleLower.includes(k.toLowerCase()))) score += 3;
-
-    // 트렌드 키워드 +2점
-    if (TREND_KEYWORDS.some(k => titleLower.includes(k.toLowerCase()))) score += 2;
+    // 법/판례/정책 +3점
+    if (LAW_KEYWORDS.some(k => titleLower.includes(k))) score += 3;
+    // 트렌드 +2점
+    if (TREND_KEYWORDS.some(k => titleLower.includes(k))) score += 2;
 
     // 중복 보도 점수
     const myWords = new Set(titleWords[i]);
     let dupCount = 0;
     titleWords.forEach((words, j) => {
       if (i === j) return;
-      const common = words.filter(w => myWords.has(w) && w.length > 1);
-      if (common.length >= 2) dupCount++;
+      if (words.filter(w => myWords.has(w) && w.length > 1).length >= 2) dupCount++;
     });
     if (dupCount >= 2) score += 3;
     else if (dupCount === 1) score += 1;
 
     // 오늘 기사 +1점 (KST 기준)
-    const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
-    const todayKST = kstNow.toISOString().slice(0, 10);
-    const itemDate = new Date(new Date(item.pubDate).getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    if (itemDate === todayKST) score += 1;
+    const todayKST = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const itemKST  = new Date(new Date(item.pubDate).getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    if (itemKST === todayKST) score += 1;
 
     return { ...item, score };
   });
@@ -144,7 +81,6 @@ function pickTop3(news) {
   const usedCats = new Set();
   const usedLinks = new Set();
 
-  // 카테고리 다양성 우선으로 3개 선정
   for (const item of scored) {
     if (!usedCats.has(item.cat) && !usedLinks.has(item.link)) {
       selected.push(item);
@@ -153,8 +89,6 @@ function pickTop3(news) {
     }
     if (selected.length >= 3) break;
   }
-
-  // 부족하면 점수 높은 순으로 채우기
   if (selected.length < 3) {
     for (const item of scored) {
       if (!usedLinks.has(item.link)) {
@@ -164,39 +98,20 @@ function pickTop3(news) {
       if (selected.length >= 3) break;
     }
   }
-
   return selected;
 }
 
-async function fetchNews() {
-  const results = await Promise.all(
-    HR_QUERIES.map(q =>
-      fetch(`https://openapi.naver.com/v1/search/news.json?query=${encodeURIComponent(q)}&display=20&sort=date`, {
-        headers: {
-          'X-Naver-Client-Id': process.env.NAVER_CLIENT_ID,
-          'X-Naver-Client-Secret': process.env.NAVER_CLIENT_SECRET,
-        }
-      }).then(r => r.json())
-    )
-  );
-
-  const seen = new Set();
-  const news = [];
-  results.forEach(data => {
-    (data.items || []).forEach(item => {
-      if (seen.has(item.link)) return;
-      seen.add(item.link);
-      const title = item.title.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'");
-      const desc = item.description.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'");
-      if (!isHRRelated(title, desc)) return;
-      news.push({
-        title, desc, link: item.link, pubDate: item.pubDate,
-        date: formatDate(item.pubDate), cat: categorize(title, desc)
-      });
-    });
+async function kvGetArticles() {
+  const res = await fetch(process.env.KV_REST_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.KV_REST_API_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(['GET', 'hr-articles'])
   });
-
-  return news.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+  const { result } = await res.json();
+  return result ? JSON.parse(result) : [];
 }
 
 async function sendSlack(message) {
@@ -206,46 +121,46 @@ async function sendSlack(message) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${process.env.SLACK_BOT_TOKEN}`
     },
-    body: JSON.stringify({
-      channel: process.env.SLACK_CHANNEL_ID,
-      text: message,
-      unfurl_links: false
-    })
+    body: JSON.stringify({ channel: process.env.SLACK_CHANNEL_ID, text: message, unfurl_links: false })
   });
 }
 
 module.exports = async function handler(req, res) {
   try {
-    const news = await fetchNews();
+    // KV에서 기사 로드 (collect가 07:00 KST에 이미 수집해 둠)
+    const allArticles = await kvGetArticles();
+
+    // 최근 48시간 기사를 우선 사용, 부족하면 최신 200개 사용
     const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const cutoff = new Date(kstNow.getTime() - 48 * 60 * 60 * 1000).toISOString();
+    const recent = allArticles.filter(a => a.pubDate && a.pubDate >= cutoff);
+    const news = (recent.length >= 10 ? recent : allArticles.slice(0, 200))
+      // cats 배열 → cat 단일값 변환 (점수 계산·표시용)
+      .map(a => ({ ...a, cat: (a.cats && a.cats[0]) || 'HR Insight' }));
+
     const today = kstNow.toLocaleDateString('ko-KR', {
-      year:'numeric', month:'long', day:'numeric', weekday:'short',
+      year: 'numeric', month: 'long', day: 'numeric', weekday: 'short',
       timeZone: 'Asia/Seoul'
     });
-    const top3 = pickTop3(news);
 
-    const keywords = [...new Set(
-      news.map(n => n.cat).filter(c => c !== 'HR Insight')
-    )].slice(0, 5);
+    const top3 = pickTop3(news);
+    const keywords = [...new Set(news.map(n => n.cat).filter(c => c !== 'HR Insight'))].slice(0, 5);
 
     let message = `📡 *HR Radar 브리핑 — ${today}*\n\n`;
     message += `🔑 *오늘의 주요 분야*: ${keywords.join(' · ')}\n`;
     message += `📰 *수집된 뉴스*: 총 ${news.length}건\n\n`;
     message += `━━━━━━━━━━━━━━━━\n`;
     message += `*📌 주목할 뉴스 TOP 3*\n\n`;
-
     top3.forEach((item, i) => {
-      const emoji = getCategoryEmoji(item.cat);
-      message += `${i+1}. ${emoji} [${item.cat}] <${item.link}|${item.title}>\n`;
+      message += `${i + 1}. ${getCategoryEmoji(item.cat)} [${item.cat}] <${item.link}|${item.title}>\n`;
       message += `    _${item.date}_\n\n`;
     });
-
     message += `━━━━━━━━━━━━━━━━\n`;
     message += `👉 <https://hr-news-monitor.vercel.app|HR Radar 전체 뉴스 보기>`;
 
     await sendSlack(message);
-    res.status(200).json({ ok: true, sent: top3.length });
-  } catch(e) {
+    res.status(200).json({ ok: true, sent: top3.length, total: news.length });
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+};
